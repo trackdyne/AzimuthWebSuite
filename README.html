@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AzimuthWebSuite</title><style>body{max-width:70rem;margin:2rem auto;padding:0 1rem;font:16px/1.6 system-ui}img{max-width:100%}table{border-collapse:collapse}td,th{padding:.4rem;border:1px solid #aaa}pre{overflow:auto}</style></head><body><h1 id="azimuthwebsuite"><a href="https://docs.unavlab.com/AzimuthWebSuite/">AzimuthWebSuite</a></h1>
+<p><a href="CHANGELOG.html">Version history</a>
+<a href="docs/guide.html">User guide</a></p>
+<p><strong>Web application for working with the Zima2 USBL underwater acoustic positioning system.</strong></p>
+<p>A fully browser-based PWA (Progressive Web Application). No installation is required; it uses the Web Serial API. Replaces the AzimuthSuite desktop application.</p>
+<h2 id="features">Features</h2>
+<h3 id="connection-and-positioning">Connection and positioning</h3>
+<ul>
+<li><strong>Connect to Zima2 USBL</strong> through a serial port (USB/RS-232/RS-422)</li>
+<li><strong>Connect an external GNSS compass</strong> (NMEA 0183) through a second serial port</li>
+<li><strong>Geographic positioning</strong> — automatic via GNSS or manual entry of coordinates and heading</li>
+<li><strong>“⚓ Reference beacons” mode</strong> — determine the vessel position without GNSS using the known coordinates of one or more reference beacons (inverse geodetic problem)</li>
+<li><strong>Real-time display of transponder beacons</strong> — range, azimuth, depth, signal, voltage, temperature</li>
+<li><strong>Beacon and station tracks</strong> with saving and export</li>
+<li><strong>DH filter</strong> (ACHOD) with an adaptive threshold and coordinate smoothing</li>
+<li><strong>Vessel position DH filter</strong> — protection against physically impossible jumps (for ⚓ mode)</li>
+<li><strong>Position comparison</strong> — when GNSS is available, displays the difference between the GNSS position and the position derived from reference beacons</li>
+</ul>
+<h3 id="calibration">Calibration</h3>
+<ul>
+<li><strong>Antenna angular offset calibration (φ)</strong> — automatic selection by minimizing the DRMS of a point cloud</li>
+<li><strong>Antenna calibration using a correction table</strong> — collect points while the vessel moves around a beacon and build an error table by encoder sector</li>
+<li><strong>Calibration table</strong> — load/save CSV and apply corrections in real time</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> Calibration data collection is available only in <strong>🌍 Geographic</strong> mode. An already loaded table can be applied in all modes.</p>
+</blockquote>
+<h3 id="points-of-interest-poi">Points of interest (POI)</h3>
+<ul>
+<li><strong>Load POI from CSV</strong> — target points for ROV navigation</li>
+<li><strong>Mark a beacon's current position</strong> — save findings during operation</li>
+<li><strong>Display on the map</strong> — loaded (📍) and marked (⭐) points with names and depths</li>
+<li><strong>Persistence between sessions</strong> (localStorage)</li>
+<li><strong>Export POI</strong> to CSV and KML</li>
+</ul>
+<h3 id="analysis-and-statistics">Analysis and statistics</h3>
+<ul>
+<li><strong>DRMS report</strong> — calculate the root mean square deviation of beacon tracks and export to CSV</li>
+<li><strong>Record and play back logs</strong> of communication with the device (at 2x/4x/8x speed)</li>
+<li><strong>Log analysis</strong> — beacon statistics and compass anomaly detection</li>
+</ul>
+<h3 id="data-export">Data export</h3>
+<ul>
+<li>CSV (beacon and station tracks)</li>
+<li>NMEA GGA (with hexadecimal beacon addressing)</li>
+<li>NMEA GGA (antenna track)</li>
+<li>NMEA PSIMSSB (HiPAP emulation, Head-Up and UTM)</li>
+<li>KML (tracks and POI for Google Earth/QGIS)</li>
+<li><a href="https://docs.unavlab.com/AzimuthWebSuite/tools/coord-converter.html">Coordinate converter</a> utility (Geographic (Lat, Lon) &lt;&gt; Local (meters))</li>
+</ul>
+<h3 id="interface">Interface</h3>
+<ul>
+<li><strong>Startup setup wizard</strong> — step-by-step selection of the antenna operating mode, including ⚓ mode</li>
+<li><strong>Six themes:</strong> Indoor, Light, Dark Contrast, Jack Black, Jack White, VAX</li>
+<li><strong>Ruler</strong> for measuring distances on the map</li>
+<li><strong>Responsive design</strong> — desktop, tablet, phone</li>
+<li><strong>Automatic sound speed calculation</strong> from temperature and salinity (UNESCO)</li>
+<li><strong>Reference beacons panel</strong> — add and remove beacons, monitor status and position accuracy</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<h3 id="online-github-pages">Online (GitHub Pages)</h3>
+<p>Open <code>https://docs.unavlab.com/AzimuthWebSuite/</code> in Chrome/Edge.</p>
+<h3 id="locally">Locally</h3>
+<p>Copy all files into a folder and open <code>index.html</code> in a browser. No server is required.</p>
+<h3 id="on-android">On Android</h3>
+<p>Use <a href="https://github.com/ucnl/UCNL_Launcher">UCNL Launcher</a>, a WebView wrapper with Web Serial API support for Android devices.</p>
+<h2 id="supported-browsers">Supported browsers</h2>
+<ul>
+<li>Google Chrome 89+</li>
+<li>Microsoft Edge 89+</li>
+<li>Opera 75+</li>
+<li>Other Chromium-based browsers</li>
+</ul>
+<blockquote>
+<p>Firefox and Safari <strong>do not support</strong> the Web Serial API.</p>
+</blockquote>
+<h2 id="log-format">Log format</h2>
+<p>Compatible with AzimuthSuite (C#) logs. Logs from AzimuthSuite and AzimuthConsole can be loaded and played back.</p>
+<h2 id="license">License</h2>
+<p><a href="https://github.com/ucnl/AzimuthWebSuite/blob/main/LICENSE">GNU GPL v3.0</a></p>
+<h2 id="links">Links</h2>
+<ul>
+<li><a href="https://docs.unavlab.com/navigation_and_tracking_systems_ru.html#zima">Zima2 documentation</a></li>
+<li><a href="https://github.com/ucnl/UCNL_Launcher">UCNL Launcher (Android WebView)</a></li>
+<li><a href="https://github.com/ucnl/AzimuthConsole">AzimuthSuite (desktop)</a></li>
+</ul>
+<hr>
+<p>© 2026 <a href="https://unavlab.com">UC&amp;NL</a></p>
+</body></html>

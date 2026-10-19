@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AzimuthWebSuite</title><style>body{max-width:70rem;margin:2rem auto;padding:0 1rem;font:16px/1.6 system-ui}img{max-width:100%}table{border-collapse:collapse}td,th{padding:.4rem;border:1px solid #aaa}pre{overflow:auto}</style></head><body><h1 id="changelog">Changelog</h1>
+<h2 id="160---2026-10-15">[1.6.0] - 2026-10-15</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li>Multilingual interface: Russian, English, Portuguese (BR). Language selector in the top bar and settings window.</li>
+<li>Modules localization/i18n.js and localization/languages.js.</li>
+<li>Language switching without reloading the page; the selection is saved in localStorage (key azimuth_language).</li>
+<li>Automatic language selection based on navigator.language on first launch (with English as the fallback).</li>
+<li>Portuguese is based on the Brazilian variant; users with pt-PT, pt-AO, and pt-MZ also receive it.</li>
+<li>Localized data-i18n attributes in index.html — text, headings, placeholders, aria-label, data-empty-label.</li>
+<li>Added a Localization document describing the translation catalogs and the rules for adding a language.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>app.js: all user-facing strings moved to I18n.t / I18n.message / I18n.html / I18n.bindText.</li>
+<li>setStatus accepts a string or a {key, params} descriptor and updates the data-i18n binding — the status is redrawn when the language changes.</li>
+<li>The device label (device-label) is redrawn through renderDeviceLabel() with localized captions.</li>
+<li>Reports (DRMS, log analysis) are saved in analysisSnapshot and redrawn on language changes through languagechange.</li>
+<li>refreshLanguagePresentation() is the single refresh point for dynamic elements (beacon cards, reference beacon list, status bar, reports).</li>
+<li>Documentation: guide.md and guide_en.md updated for 1.6.0; typos corrected; links to localization added.</li>
+</ul>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li>UIWizard: the “Do not show again” checkbox no longer resets when switching radio buttons on the “Reference beacons” step (state saved and restored in onRender).</li>
+<li>Documentation: removed the duplicate “9. Calibration” item from the guide.md table of contents; corrected the numbering of subsequent items.</li>
+<li>Documentation: corrected Russian spelling errors (“маневрируе” → “маневрирует”, “перемещаеться” → “перемещаться”, “ячеки” → “ячейки”).</li>
+<li>Documentation: images in guide.md now have meaningful alt text instead of img.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>All interface strings are in localization/languages.js; app.js and ui-*.js modules contain no hardcoded user-facing strings except console diagnostic messages (these are also translated through I18n.t).</li>
+<li>Backward compatibility: the zima2_settings format in localStorage is unchanged; saved tracks, POI, calibrations, geographic positioning settings, and reference beacons are restored without changes.</li>
+<li>Documentation localization (beyond RU/EN) is planned; the Portuguese guide_pt.md has not yet been created.</li>
+</ul>
+<h2 id="150---2026-10-14">[1.5.0] - 2026-10-14</h2>
+<h3 id="fixed-1">Fixed</h3>
+<ul>
+<li>Eliminated false acknowledgment of write commands when transmission to the device fails.</li>
+<li>The serial port now closes correctly on disconnection and reconnection errors — reconnecting no longer gets stuck.</li>
+<li>Fixed corruption of multibyte characters at serial packet boundaries.</li>
+<li>Western longitude no longer becomes eastern longitude when calculating beacon coordinates.</li>
+<li>UNESCO sound speed calculation — eliminated overestimation when salinity is specified.</li>
+<li>NMEA GGA export brought into compliance with the standard (two-digit minutes, carry into degrees).</li>
+<li>CSV track export — eliminated the column shift in the station row.</li>
+<li>DRMS export to CSV — beacon data is now included in the file.</li>
+<li>PSIMSSB export with UTM brought into alignment with the reference projection (northing, zone at ±180°).</li>
+<li>POI export and import correctly handle names containing commas, quotation marks, and line breaks.</li>
+<li>The GNSS parser rejects invalid data (range, minutes ≥ 60, status, quality).</li>
+<li>Track filters — eliminated a source of errors after a hypothesis change and when the vessel moves while the beacon is stationary.</li>
+<li>ACHOD filter (compass only) — correctly handles the direction of rotation.</li>
+<li>Antenna calibration — clears the outdated table when measurements are added.</li>
+<li>φ calibration no longer returns the starting angle as the result when no solution is found.</li>
+<li>Track rendering in Cartesian mode — points without coordinates no longer move to (0, 0).</li>
+<li>Restoring geographic positioning settings with a heading only (without coordinates) no longer causes an error.</li>
+<li>⚓ Reference beacon mode — an outdated vessel position is no longer used.</li>
+<li>Log import: “Save” downloads the loaded data rather than the previous recording.</li>
+<li>A log crossing midnight plays back with the correct progression of time.</li>
+<li>Log analysis: service records no longer distort the percentage of successful beacon responses.</li>
+<li>Heading source selection — “HDT only” and “Magnetic only” are applied consistently to all sources.</li>
+<li>Service Worker — does not delete other applications' caches or substitute index.html for missing documents.</li>
+<li>Web wrapper (Android) — fixed a memory leak during downloads.</li>
+<li>If local storage is unavailable, the application no longer interrupts initialization and settings operations.</li>
+<li>Protection against numerical outliers in haversine (antipodes).</li>
+<li>Numeric settings with a value of <code>0</code> are no longer replaced with the default value.</li>
+</ul>
+<h3 id="notes-1">Notes</h3>
+<ul>
+<li>The changes are internal (filter processing order, port resource cleanup, rendering) — they do not change visible behavior, but eliminate sources of rare failures.</li>
+<li>Verified using recorded logs and in a browser. Physical hardware and native Android were not retested.</li>
+<li>Interface localization is not included in this version.</li>
+</ul>
+<h2 id="143---2026-10-06">[1.4.3] - 2026-10-06</h2>
+<h3 id="added-1">Added</h3>
+<ul>
+<li>Added a utility for converting AzimuthConsole logs to CSV/KML/DXF (Tools &gt; AzimuthConsole log parser)</li>
+</ul>
+<h2 id="142---2026-10-05">[1.4.2] - 2026-10-05</h2>
+<h3 id="changed-1">Changed</h3>
+<ul>
+<li><strong>Track rendering performance:</strong> reworked the drawing loop — eliminated FPS drops during prolonged operation with large tracks</li>
+<li><strong>Track storage:</strong> old points are now trimmed in blocks (amortized O(1)) instead of shifting array elements individually — eliminated periodic freezes as large tracks accumulate</li>
+<li><strong>“Max. points per track” setting</strong> now controls only the rendering window and <strong>does not affect</strong> storage depth — data is always retained in full for export</li>
+<li><strong>Track rendering:</strong> points falling within the same screen pixel are skipped (adaptive decimation) — the track looks the same but is drawn several times faster when zoomed out</li>
+<li><strong>CSS variable cache:</strong> rendering colors are read once and reused (reset when the theme changes) — removed hundreds of <code>getComputedStyle</code> calls per second</li>
+</ul>
+<h3 id="added-2">Added</h3>
+<ul>
+<li><strong>Track tail glow:</strong> the last 100 points of beacon tracks and the station track are highlighted with a translucent tail, making the head of the track (recent data) visible</li>
+</ul>
+<h3 id="fixed-2">Fixed</h3>
+<ul>
+<li>FPS drops during prolonged operation (several hours) with many beacons and accumulated tracks</li>
+<li>The “Max. points per track” setting no longer causes irreversible loss of data intended for export</li>
+</ul>
+<h2 id="141---2026-10-01">[1.4.1] - 2026-10-01</h2>
+<h3 id="added-3">Added</h3>
+<ul>
+<li><strong>“🧭 Heading only”</strong> mode in the manual positioning panel — for debugging and accuracy assessment in <strong>⚓ Reference beacons</strong> mode
+<ul>
+<li>Allows setting only the antenna heading (<code>heading</code>), without latitude and longitude</li>
+<li>Antenna coordinates are calculated automatically from reference beacons</li>
+<li>Mode selector in the positioning panel: <strong>🌍 Full (lat/lon + heading)</strong> / <strong>🧭 Heading only (for ⚓)</strong></li>
+<li>Latitude and longitude fields are automatically disabled, with the placeholder “(from references)”</li>
+<li>A hint below the selector explains that coordinates will be calculated from reference beacons</li>
+</ul>
+</li>
+<li><strong>“🧭 Set heading”</strong> button in the <strong>⚓ Reference beacons</strong> panel — quickly opens the positioning panel in heading-only mode</li>
+<li>Automatically returns to the <strong>⚓ Reference beacons</strong> panel after applying a heading (only in <code>beacon_referenced</code> mode)</li>
+<li>Automatically switches the positioning panel to heading-only mode when the antenna mode changes to <strong>⚓ Reference beacons</strong></li>
+<li>Saves the positioning mode (<code>full</code> / <code>heading_only</code>) in localStorage</li>
+</ul>
+<h3 id="changed-2">Changed</h3>
+<ul>
+<li><strong>Setup wizard (UIWizard):</strong> selecting <strong>“Yes, use reference beacons ⚓”</strong> no longer automatically opens the positioning panel — only the <strong>⚓ Reference beacons</strong> panel opens, with a hint to press <strong>🧭 Set heading</strong></li>
+<li><strong>Setup wizard:</strong> the GNSS port baud rate is not overwritten if the “GNSS compass” step was not shown (relevant to the ⚓ scenario without GNSS)</li>
+<li><strong>Setup wizard:</strong> removed the unused <code>getActiveSteps()</code> function and step <code>showCondition</code> attributes (dead code)</li>
+<li><strong>Setup wizard:</strong> protection against calling <code>finish()</code> twice (<code>isFinishing</code> flag)</li>
+<li><strong>Setup wizard:</strong> switching radio buttons on the “Reference beacons” step no longer loses the “Do not show again” checkbox state</li>
+<li>In <strong>⚓ Reference beacons</strong> mode, the antenna panel replaces <code>--</code> with <strong>“⚓ waiting...”</strong> until the vessel position is calculated</li>
+<li>The positioning and reference beacon panels no longer open simultaneously (no overlapping modals)</li>
+</ul>
+<h3 id="fixed-3">Fixed</h3>
+<ul>
+<li><strong>Positioning panel:</strong> saving/loading <code>NaN</code> in localStorage worked incorrectly (JSON converted <code>NaN</code> to <code>null</code>, breaking <code>isNaN</code> checks) — <code>null</code> is now explicitly interpreted as “not set”</li>
+<li><strong>Positioning panel:</strong> closing the reference panel with the <strong>🧭 Set heading</strong> button no longer leaves dangling open panels</li>
+<li><strong>UIWizard:</strong> the “Do not show again” checkbox on the “Reference beacons” step was reset when switching radio buttons</li>
+</ul>
+<h3 id="notes-2">Notes</h3>
+<ul>
+<li><strong>“🧭 Heading only”</strong> mode is primarily intended for debugging and accuracy assessment in <code>beacon_referenced</code>: it allows the antenna to be held stationary, its direction to be set, and the spread of the calculated vessel position (<code>⚓ Accuracy</code>) and the coordinates of the beacons being located to be observed</li>
+<li>Antenna heading can be set in two ways: manually (positioning panel) or from an external GNSS compass (HDT/HDM/HDG). Both sources are equivalent — GNSS is not blocked in <code>beacon_referenced</code> mode</li>
+<li>Full positioning (lat/lon + heading) remains available in <code>beacon_referenced</code> mode — the selector can be switched back to <strong>🌍 Full</strong></li>
+</ul>
+<h2 id="140---2026-09-23">[1.4.0] - 2026-09-23</h2>
+<h3 id="added-4">Added</h3>
+<ul>
+<li>New antenna operating mode: <strong>⚓ Reference beacons</strong> (<code>beacon_referenced</code>)
+<ul>
+<li>The vessel position is calculated from the known coordinates of one or more reference beacons (inverse geodetic problem)</li>
+<li>Position averaging using the median (with multiple reference beacons), with spread and age monitoring</li>
+<li>Position buffer with a 20-second lifetime (protection against stale data)</li>
+<li>DH filter for the vessel position (protection against physically impossible jumps), shared by all reference beacons</li>
+<li>Rejected vessel positions are displayed on the map as gray crosses labeled “REJECTED”</li>
+<li>DH filter and smoother for the beacons being located (in geographic coordinates)</li>
+</ul>
+</li>
+<li><strong>“⚓ Reference beacons”</strong> panel in the Tools menu:
+<ul>
+<li>Add/remove reference beacons with coordinates and depth</li>
+<li>Reference beacon list with removal controls</li>
+<li>Status indicator (active/ready/waiting for data)</li>
+<li>Current vessel position display (coordinates, sources, spread, age)</li>
+</ul>
+</li>
+<li><strong>“⚓ Reference beacons”</strong> option in the antenna mode settings</li>
+<li>New <strong>“Reference beacons”</strong> step in the startup setup wizard (UIWizard)</li>
+<li><strong>⚓</strong> indicator in the antenna panel when the mode is active</li>
+<li><strong>“⚓ Accuracy”</strong> row in the antenna panel — spread between reference beacons, number of sources, age (shown only with 2+ reference beacons)</li>
+<li><strong>“GNSS”</strong> and <strong>“Difference”</strong> rows in the antenna panel — comparison of the position derived from reference beacons with the GNSS position (when GNSS data is available)</li>
+<li><strong>“Max. vessel speed”</strong> setting in ⚙ Settings → Vessel filter (DH) — vessel position DH filter threshold (0.5–50 m/s, default 2.0)</li>
+<li>Mode visualization on the map:
+<ul>
+<li>Reference beacons are highlighted with a gold outline and a ⚓ icon</li>
+<li>Dashed gold lines from reference beacons to the vessel position</li>
+<li>A spread circle around the vessel position</li>
+</ul>
+</li>
+<li>Saves reference beacons in localStorage (restored between sessions)</li>
+<li>Automatically sets the map anchor when a reference beacon is added/activated</li>
+</ul>
+<h3 id="changed-3">Changed</h3>
+<ul>
+<li><strong><code>azm-manager.js</code> refactoring:</strong> <code>processBeaconData()</code> split into a dispatcher and strategies (<code>strategyCartesianFixed</code>, <code>strategyGeographic</code>, <code>strategyBeaconReferenced</code>) — simplifies adding new modes</li>
+<li><strong>CSS refactoring:</strong> introduced <code>--radius-*</code> variables and a <code>--z-*</code> hierarchy; removed duplicates; dropdown menus and panels now use the <code>.visible</code> class instead of inline styles</li>
+<li>The <strong>Log</strong> button now matches the size of the other top-bar buttons</li>
+<li>All panels now have a consistent style (shared padding, border-radius, box-shadow)</li>
+<li>Buttons inside panels standardized through <code>.panel-btn-*</code> classes</li>
+<li>Playback progress indicator (<code>#playback-progress</code>) and speed control (<code>#playback-speed-control</code>) are managed through the <code>.active</code> class</li>
+<li>In <code>beacon_referenced</code> mode, the GNSS position is saved separately (for comparison) and does not overwrite the working vessel position</li>
+<li>Reference beacons are not added to beacon tracks and are not processed by the DH filter or smoother (their coordinates are set by the user and remain stable)</li>
+<li>The station track in <code>beacon_referenced</code> mode is built from the calculated vessel position (not GNSS)</li>
+<li>Documentation (guide and readme) updated</li>
+</ul>
+<h3 id="fixed-4">Fixed</h3>
+<ul>
+<li><strong>CSS:</strong> fixed the <code>..dropdown-menu</code> typo (double dot), which prevented submenus in the Tools menu from working</li>
+<li><strong>CSS:</strong> the <code>--radius-sm/--radius/--radius-lg</code> variables were undefined — rounded corners now work correctly</li>
+<li><strong>UI:</strong> submenus (POI, Calibrations) are no longer permanently expanded; they respond to hover and tap</li>
+<li><strong>UI:</strong> dropdown menus on mobile devices/tablets no longer extend beyond the screen edge</li>
+<li><strong>UI:</strong> on narrow screens, submenus expand downward (as a tree) rather than sideways</li>
+<li><strong>Vessel position age</strong> in the antenna panel showed billions of seconds (comparison of virtual and real time). Added an <code>updatedAt</code> field (real time) to <code>shipPosition</code></li>
+<li><strong><code>recalculateShipPosition</code></strong> used <code>Date.now()</code> instead of <code>timeProvider()</code> — during log playback, this caused all buffer entries to be considered stale</li>
+<li><strong>Vessel position DH filter</strong> used degrees instead of radians (unlike <code>DHTrackFilter</code> for beacons), causing all positions to be rejected</li>
+<li><strong>Reference beacon</strong> was not displayed at its coordinates if the map anchor was not set. The anchor is now set when a reference beacon is added/activated</li>
+<li><strong>Station track</strong> was not built in <code>beacon_referenced</code> mode when there was only one reference beacon. A point is now added in the early return for a reference beacon</li>
+</ul>
+<h3 id="notes-3">Notes</h3>
+<ul>
+<li><code>beacon_referenced</code> mode requires <strong>at least one reference beacon</strong> with known coordinates</li>
+<li>In <code>beacon_referenced</code> mode, antenna offsets (<code>offsetX/offsetY</code>) <strong>are not applied</strong> — only the angular correction <code>phi</code> is used</li>
+<li>Position accuracy (<code>spread</code>) is evaluated <strong>only with 2+ reference beacons</strong>. With one beacon, <code>spread = 0</code> and the “⚓ Accuracy” row in the antenna panel is hidden</li>
+<li>The GNSS position (if present in the log) is displayed in the antenna panel for comparison with the position derived from reference beacons — the “GNSS” and “Difference” rows</li>
+<li>The position buffer is cleared when leaving <code>beacon_referenced</code> mode</li>
+<li>Reference beacons excluded from the interrogation mask are not removed automatically — the vessel position is frozen at the last value (for up to 20 seconds)</li>
+</ul>
+<h2 id="1310---2026-09-21">[1.3.10] - 2026-09-21</h2>
+<h3 id="fixed-5">Fixed</h3>
+<ul>
+<li>Removed the offset when using the ruler</li>
+</ul>
+<h3 id="added-5">Added</h3>
+<ul>
+<li>Support for **HDG messages containing compass data</li>
+<li>Support for operation with compass readings only — outliers can be rejected even without a geographic antenna position</li>
+</ul>
+<h2 id="139---2026-09-14">[1.3.9] - 2026-09-14</h2>
+<h3 id="added-6">Added</h3>
+<ul>
+<li>PWA shell: manifest (<code>manifest.json</code>) and Service Worker (<code>sw.js</code>) — the application can be installed as a standalone desktop application (Chrome, Edge)</li>
+<li>Application icons (192×192, 512×512)</li>
+</ul>
+<h3 id="changed-4">Changed</h3>
+<ul>
+<li>The Service Worker is registered only in a secure context (http/https). Operation from <code>file://</code> and the Android Launcher is unaffected</li>
+<li>Automatic application updates through the Service Worker (<code>skipWaiting()</code> + <code>clients.claim()</code>) — a new version is applied on the next launch</li>
+<li>Static asset caching does not affect the Web Serial API (serial communicates directly with USB, bypassing the network)</li>
+</ul>
+<h3 id="notes-4">Notes</h3>
+<ul>
+<li>In Vivaldi standalone mode, the Web Serial port selection dialog may not appear — this is a known browser bug. Standalone mode works correctly in Chrome and Edge</li>
+</ul>
+<h2 id="138---2026-09-01">[1.3.8] - 2026-09-01</h2>
+<h3 id="added-7">Added</h3>
+<ul>
+<li>Ability to use an Android device's built-in compass for manual positioning</li>
+</ul>
+<h3 id="changed-5">Changed</h3>
+<ul>
+<li>Improved handling of built-in Android device sensors</li>
+</ul>
+<h2 id="137---2026-07-29">[1.3.7] - 2026-07-29</h2>
+<h3 id="added-8">Added</h3>
+<ul>
+<li>Track export to DXF (CAD)</li>
+</ul>
+<h2 id="136---2026-07-22">[1.3.6] - 2026-07-22</h2>
+<h3 id="added-9">Added</h3>
+<ul>
+<li>Calibration of the angular offset between antenna zero and compass using a known point (DRMS report and Calibration menu)</li>
+</ul>
+<h3 id="fixed-6">Fixed</h3>
+<ul>
+<li>Improved handling of corrupted NMEA messages</li>
+<li>Text display in the DRMS report</li>
+</ul>
+<h2 id="135---2026-07-20">[1.3.5] - 2026-07-20</h2>
+<h3 id="fixed-7">Fixed</h3>
+<ul>
+<li>Fixed track and beacon icon display in geographic mode</li>
+</ul>
+<h2 id="134---2026-07-17">[1.3.4] - 2026-07-17</h2>
+<h3 id="added-10">Added</h3>
+<ul>
+<li>Coordinate converter utility: load CSV/KML and convert coordinates from geographic coordinates to meters and back</li>
+<li>Interactive azimuth angle adjustment (antenna direction) when converting from Cartesian coordinates</li>
+</ul>
+<h3 id="fixed-8">Fixed</h3>
+<ul>
+<li>Azimuth arrow display in Cartesian mode</li>
+</ul>
+<h2 id="133---2026-07-16">[1.3.3] - 2026-07-16</h2>
+<h3 id="added-11">Added</h3>
+<ul>
+<li>Startup setup wizard (UIWizard): step-by-step selection of antenna mode, geographic positioning, and GNSS compass, with connection verification</li>
+</ul>
+<h3 id="fixed-9">Fixed</h3>
+<ul>
+<li>Antenna azimuth resets correctly when switching modes</li>
+<li>Fixed an error when processing a beacon service message on power-up</li>
+<li>Fixed calculation of the slant range projection when the antenna or beacon depth is unavailable</li>
+<li>Eliminated double application of the azimuth correction angle in Cartesian mode</li>
+<li>Fixed track display and the position of beacon icons relative to the track in Cartesian mode</li>
+</ul>
+<h2 id="132---2026-07-10">[1.3.2] - 2026-07-10</h2>
+<h3 id="added-12">Added</h3>
+<ul>
+<li>Cartesian mode for operating with a stationary antenna in metric coordinates</li>
+<li>Separate DH filter for Cartesian coordinates (DHTrackFilterXYZ)</li>
+<li>Coordinate smoother for Cartesian mode (TrackMedianFilterXYZ)</li>
+<li>X/Y axis labels on the grid in Cartesian mode</li>
+<li>Beacon following in Cartesian coordinates (followCartesianPoint)</li>
+<li>CSV export with X,Y,Z columns in Cartesian mode (lat/lon are empty)</li>
+</ul>
+<h3 id="changed-6">Changed</h3>
+<ul>
+<li>GNSS data is ignored in Cartesian mode (the antenna remains at 0,0,0)</li>
+<li>Antenna table calibration is disabled in Cartesian mode with a warning</li>
+<li>POI are not displayed in Cartesian mode (no geographic reference)</li>
+<li>The station track is not drawn in Cartesian mode</li>
+<li>The antenna card shows X/Y in Cartesian mode; azimuth is fixed at 0°</li>
+<li>GGA, KML, PSIMSSB UTM export is unavailable in Cartesian mode, with an explanation</li>
+<li>Geographic positioning settings are restored/reset when switching modes</li>
+<li>A double tap/double click resets the view according to the mode</li>
+</ul>
+<h2 id="131---2026-06-26">[1.3.1] - 2026-06-26</h2>
+<h3 id="changed-7">Changed</h3>
+<ul>
+<li>Cleaned up color schemes</li>
+<li>Improved port handling when connecting a beacon</li>
+</ul>
+<h2 id="130---2026-06-25">[1.3.0] - 2026-06-25</h2>
+<h3 id="added-13">Added</h3>
+<ul>
+<li>Beacon configuration: when a beacon is connected, a button next to the device label opens the configuration dialog</li>
+</ul>
+<h2 id="129---2026-06-24">[1.2.9] - 2026-06-24</h2>
+<h3 id="added-14">Added</h3>
+<ul>
+<li>Points of interest (POI): load from CSV, mark a beacon's current position (📌 on its card), display on the map</li>
+<li>Export POI to CSV and KML</li>
+<li>Save POI between sessions (localStorage)</li>
+<li>Statistical analysis (DRMS, etc.) in Tools → DRMS report</li>
+</ul>
+<h3 id="changed-8">Changed</h3>
+<ul>
+<li>Tools menu reorganized: added Calibrations and POI submenus</li>
+<li>POI are displayed without distance (name and depth only)</li>
+</ul>
+<h2 id="128---2026-06-23">[1.2.8] - 2026-06-23</h2>
+<h3 id="added-15">Added</h3>
+<ul>
+<li>Antenna calibration using a correction table: collect points while moving around a beacon, then build an error table by sector</li>
+<li>Ability to download the full calibration report (raw data + table) for analysis</li>
+</ul>
+<h3 id="changed-9">Changed</h3>
+<ul>
+<li>Antenna calibration button moved from Log to Tools</li>
+<li>Calibration table loading and reset moved into callbacks to eliminate dependence on global variables</li>
+</ul>
+<h3 id="fixed-10">Fixed</h3>
+<ul>
+<li>Fixed loading a calibration table from a file in AntennaCorrector</li>
+</ul>
+<h2 id="127---2026-06-16">[1.2.7] - 2026-06-16</h2>
+<h3 id="added-16">Added</h3>
+<ul>
+<li>Antenna track export to GGA</li>
+<li>Warning when closing the page if tracks or a log are present</li>
+</ul>
+<h3 id="fixed-11">Fixed</h3>
+<ul>
+<li>Time in GGA export</li>
+</ul>
+<h2 id="126---2026-06-10">[1.2.6] - 2026-06-10</h2>
+<h3 id="fixed-12">Fixed</h3>
+<ul>
+<li>Beacon card display</li>
+<li>Automatic centering when clicking a beacon or station card</li>
+</ul>
+<h2 id="125---2026-06-10">[1.2.5] - 2026-06-10</h2>
+<h3 id="changed-10">Changed</h3>
+<ul>
+<li>Refactoring: extracted <code>ui-topo.js</code>, <code>ui-calibration.js</code>, <code>ui-canvas.js</code> modules and created <code>export.js</code></li>
+<li>Eliminated duplicate geodetic calculation code (using <code>GeoUtils.geoToScreen()</code>)</li>
+<li>Optimized initialization and event handlers (mouse, touch)</li>
+<li>Simplified zoom and panning through <code>UICanvas</code></li>
+</ul>
+<h3 id="fixed-13">Fixed</h3>
+<ul>
+<li>Added depth to KML export</li>
+</ul>
+<h2 id="124---2026-06-08">[1.2.4] - 2026-06-08</h2>
+<h3 id="added-17">Added</h3>
+<ul>
+<li>Ruler tool for measuring distances on the map (two points, a rubber-band line, works while zooming/panning)</li>
+</ul>
+<h3 id="changed-11">Changed</h3>
+<ul>
+<li>Refactoring: extracted <code>ui-themes.js</code>, <code>ui-settings.js</code>, <code>ui-ruler.js</code> modules</li>
+<li>Improved grid colors in dark themes (Jack Black, Dark Contrast, VAX)</li>
+<li>Application version updated to 1.2.4</li>
+</ul>
+<h2 id="123---2026-06-08">[1.2.3] - 2026-06-08</h2>
+<h3 id="added-18">Added</h3>
+<ul>
+<li>Maximum beacon speed setting for the ACHOD filter (0.5–5 m/s)</li>
+<li>Different ACHOD filter operating modes for different ranges</li>
+<li>Skip empty time during log playback (up to the first beacon point)</li>
+<li>Accelerated log playback (2x, 4x, 8x)</li>
+</ul>
+<h3 id="changed-12">Changed</h3>
+<ul>
+<li>ACHOD filter (DH-filter) adapted to work with different queue sizes</li>
+<li>Improved settings saving/loading</li>
+<li>Added maximum beacon speed setting</li>
+</ul>
+<h3 id="fixed-14">Fixed</h3>
+<ul>
+<li>Fixed incorrect display of the saved maximum speed in the settings window</li>
+<li>Manual positioning now allows changing only the azimuth without overwriting coordinates</li>
+</ul>
+<h2 id="122---2026-06-06">[1.2.2] - 2026-06-06</h2>
+<h3 id="added-19">Added</h3>
+<ul>
+<li>Display of filter-rejected points (gray crosses) for diagnostics</li>
+<li>Beacon temperature on the card (in the VCC row)</li>
+<li>Adaptive DH filter threshold based on range</li>
+<li>Jack Black, Jack White, VAX themes added to the theme switching cycle</li>
+</ul>
+<h3 id="changed-13">Changed</h3>
+<ul>
+<li>Coordinate smoothing is disabled at ranges &gt; 1000 m</li>
+<li>Azimuth on the card: in parentheses when measured, without parentheses when absolute</li>
+</ul>
+<h3 id="fixed-15">Fixed</h3>
+<ul>
+<li>Range on the beacon card always shows the current measured value</li>
+</ul>
+<h2 id="121---2026-06-05">[1.2.1] - 2026-06-05</h2>
+<h3 id="added-20">Added</h3>
+<ul>
+<li>Improved log analysis (extended heading statistics)</li>
+<li>Correct recalculation of deviation and variation in the HDG message</li>
+</ul>
+<h3 id="fixed-16">Fixed</h3>
+<ul>
+<li>Log parsing accounts for different sources (GNSS, HDM)</li>
+</ul>
+<h2 id="120---2026-06-02">[1.2.0] - 2026-06-02</h2>
+<h3 id="added-21">Added</h3>
+<ul>
+<li>PSIMSSB export with UTM coordinates (C,E)</li>
+<li>Median coordinate filter</li>
+<li>Antenna angle corrector using a calibration table</li>
+<li>Automatic UNESCO sound speed calculation (temperature + salinity)</li>
+</ul>
+<h3 id="fixed-17">Fixed</h3>
+<ul>
+<li>Time in GGA/PSIMSSB without a date (hhmmss)</li>
+<li>xM/yM in degrees instead of radians</li>
+</ul>
+<h2 id="110---2026-05-15">[1.1.0] - 2026-05-15</h2>
+<h3 id="added-22">Added</h3>
+<ul>
+<li>PSIMSSB export (C,H — Head-Up)</li>
+<li>Save relative coordinates in the track</li>
+</ul>
+<h2 id="100---2026-04-01">[1.0.0] - 2026-04-01</h2>
+<ul>
+<li>First stable release</li>
+</ul>
+</body></html>

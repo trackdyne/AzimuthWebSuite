@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AzimuthWebSuite</title><style>body{max-width:70rem;margin:2rem auto;padding:0 1rem;font:16px/1.6 system-ui}img{max-width:100%}table{border-collapse:collapse}td,th{padding:.4rem;border:1px solid #aaa}pre{overflow:auto}</style></head><body><h1 id="azimuthwebsuite-user-guide">AzimuthWebSuite User Guide</h1>
+<p>Version: <a href="../CHANGELOG.html">1.6.0</a></p>
+<hr>
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation-and-startup">Installation and startup</a></li>
+<li><a href="#interface">Interface</a></li>
+<li><a href="#connecting-hardware">Connecting hardware</a></li>
+<li><a href="#geographic-positioning">Geographic positioning</a></li>
+<li><a href="#reference-beacon-mode">Reference beacon mode</a></li>
+<li><a href="#working-with-beacons">Working with beacons</a></li>
+<li><a href="#tracks">Tracks</a></li>
+<li><a href="#calibration">Calibration</a>
+<ul>
+<li><a href="#%CF%86-calibration-using-a-known-point">φ calibration using a known point</a></li>
+<li><a href="#%CF%86-calibration-by-point-cloud">φ calibration by point cloud</a></li>
+<li><a href="#antenna-calibration-correction-table">Antenna calibration (correction table)</a></li>
+</ul>
+</li>
+<li><a href="#points-of-interest-poi">Points of interest (POI)</a></li>
+<li><a href="#recording-and-playing-logs">Recording and playing logs</a></li>
+<li><a href="#log-analysis">Log analysis</a></li>
+<li><a href="#data-export">Data export</a></li>
+<li><a href="#drms-report">DRMS report</a></li>
+<li><a href="#ruler">Ruler</a></li>
+<li><a href="#themes">Themes</a></li>
+<li><a href="#settings">Settings</a></li>
+<li><a href="#keyboard-shortcuts-and-gestures">Keyboard shortcuts and gestures</a></li>
+<li><a href="#file-formats">File formats</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ol>
+<hr>
+<h2 id="introduction">Introduction</h2>
+<p><strong>AzimuthWebSuite</strong> is a browser application for working with the <strong>Zima2 USBL</strong> underwater acoustic positioning system.</p>
+<h3 id="main-use-cases">Main use cases</h3>
+<ul>
+<li><strong>Finding and tracking underwater objects</strong> — transponder beacons fitted to ROVs, divers, or stationary objects</li>
+<li><strong>ROV navigation</strong> — displaying position relative to the vessel in real time</li>
+<li><strong>Operating without GNSS</strong> — determining the vessel position from reference beacons with known coordinates (⚓ mode)</li>
+<li><strong>Antenna calibration</strong> — compensating for instrumental errors in the USBL antenna</li>
+<li><strong>Accuracy analysis</strong> — calculating DRMS from beacon tracks</li>
+<li><strong>Documenting operations</strong> — recording logs, exporting tracks, and marking findings as POI</li>
+</ul>
+<h3 id="system-requirements">System requirements</h3>
+<ul>
+<li>A Chromium-based browser (Chrome 89+, Edge 89+, Opera 75+)</li>
+<li>Web Serial API (enabled by default)</li>
+<li>A screen resolution of at least 480×800 (responsive layout)</li>
+</ul>
+<hr>
+<h2 id="installation-and-startup">Installation and startup</h2>
+<h3 id="online-version">Online version</h3>
+<p>The upstream application is available at <a href="https://docs.unavlab.com/AzimuthWebSuite/">docs.unavlab.com/AzimuthWebSuite</a>.</p>
+<p>This edition of AzimuthWebSuite provides the interface in English only.</p>
+<h3 id="local-startup">Local startup</h3>
+<ol>
+<li>Download all files from the repository.</li>
+<li>Place them in one folder, preserving the repository's subfolders.</li>
+<li>Open <code>index.html</code> in your browser.</li>
+</ol>
+<blockquote>
+<p>No server is required. The application runs entirely on the client.</p>
+</blockquote>
+<h3 id="android">Android</h3>
+<p>Use <a href="https://github.com/ucnl/UCNL_Launcher">UCNL Launcher</a>, a WebView wrapper with Web Serial API support.</p>
+<hr>
+<h2 id="interface">Interface</h2>
+<h3 id="language">Language</h3>
+<p>This edition runs in English only. The browser language and previously saved preferences do not change the interface language.</p>
+<p>Other language editions are available in the canonical AzimuthWebSuite repository.</p>
+<h3 id="setup-wizard">Setup wizard</h3>
+<p>The setup wizard opens automatically when the application is launched for the first time. It helps you quickly configure the antenna operating mode without going through every setting.</p>
+<p>The wizard has two, three, or four steps, depending on the selected mode.</p>
+<h4 id="step-1-antenna-mode">Step 1: Antenna mode</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-wizard-antenna.jpg" alt="Setup wizard: stationary or moving antenna"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Setup wizard — choosing whether the antenna is stationary or moving</em></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Stationary</strong> — the antenna is fixed, for example on a pier or a secured vessel. You can work in metric X, Y, Z coordinates without geographic positioning.</li>
+<li><strong>Moving</strong> — the antenna is on a moving vessel. An external GNSS compass is required.</li>
+</ul>
+<h4 id="step-2-reference-beacons">Step 2: Reference beacons</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-wizard-reference.jpg" alt="Setup wizard: reference beacons"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>The wizard asks whether a beacon with known coordinates is available as a reference</em></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>No</strong> — use a standard operating mode (Geographic or Cartesian).</li>
+<li><strong>Yes, use reference beacons ⚓</strong> — enables <strong>⚓ Reference beacons</strong> mode. The vessel position is calculated from a known beacon without GNSS. The wizard finishes immediately and opens the <strong>⚓ Reference beacons</strong> panel. To set the antenna heading, click <strong>🧭 Set heading</strong> in this panel; the positioning panel opens in <strong>🧭 Heading only</strong> mode.</li>
+</ul>
+<blockquote>
+<p>A reference beacon is a transponder beacon whose coordinates are <strong>known precisely</strong>, for example a beacon installed on the seabed at a known point or on a buoy with a known position.</p>
+</blockquote>
+<h4 id="step-3a-coordinates-for-a-stationary-antenna">Step 3a: Coordinates for a stationary antenna</h4>
+<p>If the antenna is stationary, the wizard offers these choices:</p>
+<ul>
+<li><strong>No</strong>, with the hint <strong>Work in X,Y,Z meters relative to the antenna</strong> — enables Cartesian mode. The antenna is assumed to be at (0, 0, 0), and beacon coordinates are displayed in meters: X → right, Y → forward, Z → depth. Geographic positioning is not required.</li>
+<li><strong>Yes, enter them now</strong> — enables Geographic mode and immediately opens the manual positioning panel for entering coordinates and heading.</li>
+</ul>
+<h4 id="step-3b-gnss-compass-for-a-moving-antenna">Step 3b: GNSS compass for a moving antenna</h4>
+<p>If the antenna is moving, the wizard offers to connect an external GNSS compass:</p>
+<ul>
+<li>Select the <strong>Port baud rate</strong> (4800–115200 baud; default: 38400).</li>
+<li>Click <strong>📡 Connect and check</strong>.</li>
+<li>The status shows the connection result: <strong>✓ Connected</strong> or <strong>✗ Disconnected</strong>.</li>
+<li>Click <strong>Done ✓</strong> to finish setup.</li>
+</ul>
+<h4 id="finishing-setup">Finishing setup</h4>
+<p>The final step includes <strong>Do not show again</strong>. If selected, the wizard will not open on subsequent launches.</p>
+<p>To open the wizard again, choose <strong>🔧 Tools → ⚙ Setup wizard</strong>.</p>
+<h4 id="operating-modes">Operating modes</h4>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Antenna</th>
+<th>Beacon coordinates</th>
+<th>Geographic positioning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cartesian</td>
+<td>Stationary (0,0,0)</td>
+<td>X, Y, Z in meters</td>
+<td>Not required</td>
+</tr>
+<tr>
+<td>Geographic</td>
+<td>From GNSS or entered manually</td>
+<td>Latitude, longitude</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>⚓ Reference beacons</td>
+<td>Calculated from a reference beacon</td>
+<td>Latitude, longitude</td>
+<td>Not required; a reference beacon is required</td>
+</tr>
+</tbody>
+</table>
+<h4 id="features-available-in-each-operating-mode">Features available in each operating mode</h4>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align:center">🌍 Geographic</th>
+<th style="text-align:center">📐 Cartesian</th>
+<th style="text-align:center">⚓ Reference beacons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beacon data</td>
+<td style="text-align:center">lat,lon,Z (depth)</td>
+<td style="text-align:center">X,Y,Z (meters)</td>
+<td style="text-align:center">lat,lon,Z (depth)</td>
+</tr>
+<tr>
+<td>Geographic positioning</td>
+<td style="text-align:center">✅ required (lat/lon + heading)</td>
+<td style="text-align:center">❌ not required</td>
+<td style="text-align:center">🧭 heading only (or GNSS)</td>
+</tr>
+<tr>
+<td>GNSS compass</td>
+<td style="text-align:center">✅ required (or manual positioning)</td>
+<td style="text-align:center">❌ not required/ignored</td>
+<td style="text-align:center">✅ needed for heading</td>
+</tr>
+<tr>
+<td>GNSS position</td>
+<td style="text-align:center">✅ used</td>
+<td style="text-align:center">❌ ignored</td>
+<td style="text-align:center">ℹ️ displayed for comparison</td>
+</tr>
+<tr>
+<td>Reference beacon</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅ required (1+)</td>
+</tr>
+<tr>
+<td>Beacon DH filter</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Vessel DH filter</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Beacon smoothing</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Station track</td>
+<td style="text-align:center">✅ recorded and displayed</td>
+<td style="text-align:center">❌ not recorded</td>
+<td style="text-align:center">✅ recorded from the reference-derived position</td>
+</tr>
+<tr>
+<td>Beacon tracks</td>
+<td style="text-align:center">✅ recorded and displayed</td>
+<td style="text-align:center">✅ recorded and displayed</td>
+<td style="text-align:center">✅ recorded for tracked targets only</td>
+</tr>
+<tr>
+<td>φ calibration: applying</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>φ calibration: data collection</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+</tr>
+<tr>
+<td>φ calibration using a known point</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Table calibration: applying</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Table calibration: data collection</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+</tr>
+<tr>
+<td>POI</td>
+<td style="text-align:center">✅ displayed</td>
+<td style="text-align:center">❌ hidden</td>
+<td style="text-align:center">✅ displayed</td>
+</tr>
+<tr>
+<td>CSV export</td>
+<td style="text-align:center">✅ lat,lon,Z (depth)</td>
+<td style="text-align:center">✅ X,Y,Z</td>
+<td style="text-align:center">✅ lat,lon,Z (depth)</td>
+</tr>
+<tr>
+<td>GGA export</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>KML export</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>PSIMSSB export</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅ uses xM/yM</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>PSIMSSB UTM export</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>DRMS report</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Ruler</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+</tr>
+<tr>
+<td>Setup wizard</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>📐 Cartesian mode</strong> is intended for a stationary antenna without GNSS. It provides a quick start, coordinates in meters, and CSV export with XYZ.</p>
+<p><strong>🌍 Geographic mode</strong> is intended for a moving antenna with GNSS or a known geographic position and heading. It provides the full feature set.</p>
+<h3 id="top-bar">Top bar</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-top-bar.jpg" alt="Application top bar in English"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Application top bar</em></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Element</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Indicator</td>
+<td style="text-align:left">Green: connected; flashing yellow: interrogation active; red: disconnected</td>
+</tr>
+<tr>
+<td style="text-align:left">Device name</td>
+<td style="text-align:left">Zima2 USBL; after querying the device, its model and serial number. When a transponder beacon is connected, a <strong>⚙</strong> beacon settings button also appears</td>
+</tr>
+<tr>
+<td style="text-align:left">Status line</td>
+<td style="text-align:left">Current state or last action</td>
+</tr>
+</tbody>
+</table>
+<h4 id="controls">Controls</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Button</th>
+<th style="text-align:left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">🎨</td>
+<td style="text-align:left">Cycle through themes</td>
+</tr>
+<tr>
+<td style="text-align:left">🔌/⏏ AZM</td>
+<td style="text-align:left">Connect/disconnect Zima2</td>
+</tr>
+<tr>
+<td style="text-align:left">📡/⏏ GNSS</td>
+<td style="text-align:left">Connect/disconnect an external GNSS compass</td>
+</tr>
+<tr>
+<td style="text-align:left">▶/⏸ Interrogate</td>
+<td style="text-align:left">Start/stop beacon interrogation</td>
+</tr>
+<tr>
+<td style="text-align:left">⚙ Settings</td>
+<td style="text-align:left">Open settings</td>
+</tr>
+<tr>
+<td style="text-align:left">🔧 Tools</td>
+<td style="text-align:left">Menu: positioning, POI, calibrations, DRMS, coordinate converter</td>
+</tr>
+<tr>
+<td style="text-align:left">📤 Export</td>
+<td style="text-align:left">Menu: CSV, GGA, PSIMSSB, KML</td>
+</tr>
+<tr>
+<td style="text-align:left">📋 Log</td>
+<td style="text-align:left">Menu: save, open, analyze, play</td>
+</tr>
+</tbody>
+</table>
+<h3 id="map">Map</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-map.jpg" alt="Map with antenna and beacon data"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Map panel</em></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Center</strong> — USBL antenna (diamond)</li>
+<li><strong>Direction</strong> — red line from the antenna (heading)</li>
+<li><strong>Beacons</strong> — colored circles with numbers</li>
+<li><strong>Grid</strong> — cells with a fixed size in pixels; axes pass through the antenna center</li>
+<li><strong>Scale bar</strong> — in the bottom-right corner</li>
+</ul>
+<h4 id="controls-1">Controls</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Control</th>
+<th style="text-align:left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Tracks</strong></td>
+<td style="text-align:left">Toggle track display</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Clear</strong></td>
+<td style="text-align:left">Delete recorded tracks</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Ruler</strong></td>
+<td style="text-align:left">Enable/disable the distance measurement tool on the map</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Log playback progress</strong></td>
+<td style="text-align:left">Available only during log playback</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>−</strong></td>
+<td style="text-align:left">Available only during log playback; decrease playback speed</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>1x/2x/4x/8x</strong></td>
+<td style="text-align:left">Available only during log playback; current playback speed</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>+</strong></td>
+<td style="text-align:left">Available only during log playback; increase playback speed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="beacon-panel">Beacon panel</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-beacon-panel.jpg" alt="Beacon cards in English"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Beacon panel</em></td>
+</tr>
+</tbody>
+</table>
+<p>Cards for all active beacons appear at the bottom of the screen:</p>
+<ul>
+<li>Number, range, azimuth, and depth</li>
+<li>Signal level (dB)</li>
+<li>Beacon battery voltage (V) and water temperature (°C)</li>
+<li>Coordinates, if geographic positioning is available</li>
+<li>Data age (s), indicated in green/yellow/red</li>
+<li><strong>📌</strong> button to mark the current beacon position as a POI</li>
+</ul>
+<p>Click a beacon card to center the map on that beacon and keep following it.</p>
+<h3 id="antenna-information">Antenna information</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-antenna-info.jpg" alt="Antenna information card in English"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Antenna card</em></td>
+</tr>
+</tbody>
+</table>
+<p>The card in the top-left corner of the map shows:</p>
+<ul>
+<li>Latitude and longitude</li>
+<li>Azimuth (Heading)</li>
+<li>Speed and course over ground (SOG/COG)</li>
+<li>Depth and water temperature</li>
+<li>Pitch/Roll angles</li>
+</ul>
+<p>Click the antenna card to center the map on the antenna and keep following it.</p>
+<hr>
+<h2 id="connecting-hardware">Connecting hardware</h2>
+<h3 id="zima2-usbl">Zima2 USBL</h3>
+<ol>
+<li>Connect Zima2 to a USB port, or through an RS-232/RS-422 converter.</li>
+<li>Click <strong>🔌 AZM</strong>.</li>
+<li>Select the port in the browser dialog.</li>
+<li>Baud rate: <strong>9600</strong> baud by default.</li>
+<li>The application automatically requests device information after connecting.</li>
+<li>Beacon interrogation starts automatically after the information is received.</li>
+</ol>
+<blockquote>
+<p><strong>Important:</strong> Do not disconnect power from Zima2 during interrogation. The indicator flashes yellow while interrogation is active.</p>
+</blockquote>
+<h3 id="external-gnss-compass">External GNSS compass</h3>
+<ol>
+<li>Connect the GNSS receiver to a second port.</li>
+<li>Click <strong>📡 GNSS</strong>.</li>
+<li>Select the port.</li>
+<li>Default baud rate: <strong>38400</strong> baud, configurable in <strong>⚙ Settings</strong>.</li>
+</ol>
+<p><strong>Supported NMEA 0183 messages:</strong></p>
+<ul>
+<li><code>$xxRMC</code> — coordinates, speed, and course</li>
+<li><code>$xxHDT</code> — true heading (preferred)</li>
+<li><code>$xxHDM</code> — magnetic heading</li>
+</ul>
+<hr>
+<h2 id="geographic-positioning">Geographic positioning</h2>
+<p>To display beacons in geographic coordinates, the antenna coordinates and heading must be known.</p>
+<h3 id="automatic-positioning">Automatic positioning</h3>
+<p>When an external GNSS compass is connected, position and heading update automatically.</p>
+<h3 id="manual-positioning">Manual positioning</h3>
+<ol>
+<li>Open <strong>🔧 Tools → 🌐 Manual positioning</strong>.</li>
+<li>Select a <strong>Mode</strong> at the top of the panel:
+<ul>
+<li><strong>🌍 Full (lat/lon + heading)</strong> — sets antenna coordinates and heading; the standard option for <code>geographic</code> mode.</li>
+<li><strong>🧭 Heading only (for ⚓)</strong> — sets only the heading; coordinates will be calculated from reference beacons for <code>beacon_referenced</code> mode.</li>
+</ul>
+</li>
+<li>Enter:
+<ul>
+<li><strong>Latitude</strong> in degrees, -90…+90; only in Full mode.</li>
+<li><strong>Longitude</strong> in degrees, -180…+180; only in Full mode.</li>
+<li><strong>Heading</strong> in degrees, 0…360; in either mode.</li>
+</ul>
+</li>
+<li>Click <strong>✓ Apply</strong>.</li>
+</ol>
+<blockquote>
+<p>In <strong>⚓ Reference beacons</strong> mode, the panel automatically opens in <strong>🧭 Heading only</strong> mode. Latitude and longitude fields are disabled and show the placeholder <strong>(from references)</strong>.</p>
+</blockquote>
+<h3 id="heading-only-mode">Heading only mode</h3>
+<p>Use this option in <strong>⚓ Reference beacons</strong> mode when the antenna coordinates are unknown but its direction (heading) must be set.</p>
+<p><strong>When to use it:</strong></p>
+<ul>
+<li>Debugging and evaluating accuracy in ⚓ mode</li>
+<li>A stationary antenna without a GNSS compass</li>
+<li>Holding the heading fixed to observe the spread of calculated vessel positions</li>
+</ul>
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Open the positioning panel either way:
+<ul>
+<li><strong>🔧 Tools → 🌐 Manual positioning</strong></li>
+<li>Or click <strong>🧭 Set heading</strong> in the <strong>⚓ Reference beacons</strong> panel.</li>
+</ul>
+</li>
+<li>Make sure <strong>🧭 Heading only (for ⚓)</strong> is selected.</li>
+<li>Enter the antenna heading (0–360°).</li>
+<li>Click <strong>✓ Apply</strong>.</li>
+</ol>
+<p>After applying:</p>
+<ul>
+<li><code>antennaLatDeg / antennaLonDeg = NaN</code>; reference beacons will populate these values automatically.</li>
+<li><code>antennaHeadingDeg</code> is set to the entered value.</li>
+<li>If the ⚓ panel was closed, it reopens automatically.</li>
+</ul>
+<p><strong>What to observe:</strong></p>
+<ul>
+<li><strong>⚓ Accuracy</strong> in the antenna panel: the spread of calculated positions, shown only with 2+ reference beacons.</li>
+<li><strong>Latitude/Longitude</strong> in the antenna panel: coordinates calculated from reference beacons.</li>
+<li>The station track: built from the calculated position rather than GNSS.</li>
+</ul>
+<blockquote>
+<p><strong>A GNSS compass can also supply the heading.</strong> Connect the receiver (<strong>📡 GNSS</strong>) to update the heading automatically. Heading only mode is useful when no GNSS compass is available but the antenna direction is known.</p>
+</blockquote>
+<h3 id="phone-gps">Phone GPS</h3>
+<p>The <strong>📱 GPS</strong> button requests device geolocation, if the device has built-in GPS.</p>
+<h3 id="resetting-positioning">Resetting positioning</h3>
+<p>The <strong>🗑 Reset</strong> button clears coordinates and heading.</p>
+<hr>
+<h2 id="reference-beacon-mode">Reference beacon mode</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-reference-panel.jpg" alt="Reference beacon control panel in English"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Reference beacon control panel</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="purpose">Purpose</h3>
+<p>This mode is intended for operation <strong>without GNSS</strong> when the precise position of at least one transponder beacon is known. The vessel position is calculated from measurements to that beacon by solving the inverse positioning problem.</p>
+<h3 id="when-to-use-it">When to use it</h3>
+<ul>
+<li>The vessel has no GNSS receiver.</li>
+<li>Geographic positioning cannot be set up because the vessel position is unknown.</li>
+<li>A transponder beacon has <strong>coordinates known in advance</strong>, for example on the seabed at a known point or on a buoy with a known position.</li>
+</ul>
+<h3 id="quick-start">Quick start</h3>
+<ol>
+<li>On the first launch, choose <strong>Yes, use reference beacons ⚓</strong> in the setup wizard. The application switches to this mode and opens the <strong>⚓ Reference beacons</strong> panel. Alternatively, open it manually: <strong>🔧 Tools → ⚓ Reference beacons</strong>.</li>
+<li><strong>Set the antenna heading.</strong> Click <strong>🧭 Set heading</strong> in the ⚓ panel and enter the direction (0–360°) in Heading only mode. Alternatively, connect a GNSS compass using <strong>📡 GNSS</strong> in the top bar.</li>
+<li>In the panel, select the <strong>beacon address</strong> from the interrogation mask, enter its <strong>known coordinates</strong> (latitude, longitude, depth), and click <strong>➕ Add</strong>.</li>
+<li>Click <strong>▶ Activate</strong>.</li>
+<li>Start beacon interrogation using <strong>▶ Interrogate</strong> in the top bar, or play a log using <strong>📋 Log → ▶ Play</strong>.</li>
+<li>After the first measurement, the vessel position is calculated and displayed on the map. The <strong>⚓</strong> icon next to latitude in the antenna panel means the position is calculated from reference beacons.</li>
+</ol>
+<blockquote>
+<p><strong>Antenna heading is mandatory.</strong> Without it, <code>strategyBeaconReferenced</code> cannot calculate the absolute bearing to the beacon, and the vessel position cannot be determined. Set the heading manually using 🧭 in the ⚓ panel, or connect a GNSS compass.</p>
+</blockquote>
+<h3 id="antenna-panel-contents">Antenna panel contents</h3>
+<table>
+<thead>
+<tr>
+<th>Row</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latitude / Longitude</td>
+<td><strong>Vessel position</strong> calculated from reference beacons</td>
+</tr>
+<tr>
+<td>⚓ Accuracy</td>
+<td><code>±X.Xm (N×, Ns)</code> — spread between reference-derived positions, number of sources, and age. <strong>Shown only with 2+ reference beacons</strong></td>
+</tr>
+<tr>
+<td>GNSS</td>
+<td><strong>Only when GNSS data is available</strong> in the log/port; shows the GNSS position</td>
+</tr>
+<tr>
+<td>Difference</td>
+<td><strong>Only when GNSS is available</strong>; distance between the reference-derived position and GNSS position</td>
+</tr>
+<tr>
+<td>Azimuth</td>
+<td>Antenna heading from the compass</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-reference-status.jpg" alt="Antenna panel with reference-derived and GNSS positions"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Antenna panel showing reference-derived and GNSS positions</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="position-accuracy">Position accuracy</h3>
+<ul>
+<li><strong>1 reference beacon</strong> — accuracy <strong>is not estimated</strong>. <code>spread = 0</code>, and <strong>⚓ Accuracy</strong> is <strong>hidden</strong>. Actual accuracy depends on USBL accuracy and how precisely the reference beacon coordinates are known.</li>
+<li><strong>2+ reference beacons</strong> — <code>spread</code> is displayed: the spread between positions calculated from different beacons. <strong>A smaller <code>spread</code> means greater agreement.</strong></li>
+</ul>
+<h3 id="configuring-the-vessel-dh-filter">Configuring the vessel DH filter</h3>
+<p>Open <strong>⚙ Settings → ⚓ Vessel filter (DH, reference beacon mode)</strong>:</p>
+<ul>
+<li><strong>Max. vessel speed</strong> (0.5–50 m/s; default: 2.0) — positions implying movement faster than this speed are discarded.</li>
+<li><strong>Rejected positions</strong> are drawn on the map as gray crosses labeled <strong>REJECTED</strong>.</li>
+<li><strong>If the vessel position does not update</strong>, increase <strong>Max. vessel speed</strong>.</li>
+</ul>
+<h3 id="map-display">Map display</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><img src="guide-en-reference-map.jpg" alt="Map with a reference beacon and calculated vessel track"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><em>Map showing a reference beacon and the vessel track calculated from it</em></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Reference beacon</strong> — highlighted with a <strong>gold outline</strong> and <strong>⚓</strong> next to its number</li>
+<li><strong>Dashed gold lines</strong> — from each reference beacon to the vessel position</li>
+<li><strong>Spread circle</strong> — around the vessel position with 2+ references; shows <code>spread</code></li>
+<li><strong>Rejected position</strong> — gray cross labeled <strong>REJECTED</strong></li>
+<li><strong>Station track</strong> — built from the calculated vessel position rather than GNSS</li>
+</ul>
+<h3 id="limitations">Limitations</h3>
+<ul>
+<li><strong>Antenna offsets</strong> (<code>offsetX/offsetY</code>) <strong>are not applied</strong>, because there is no external reference point in this mode. Only the angular correction <code>phi</code> is applied.</li>
+<li><strong>Multiple reference beacons</strong> are recommended for accuracy assessment. They should be <strong>spaced apart</strong> rather than close together; otherwise, position determination will be poorly conditioned.</li>
+<li><strong>Heading is mandatory.</strong> Use an external compass (HDT/HDM/HDG), the built-in Zima2 compass, or manual entry through <strong>🧭 Heading only</strong> in the positioning panel.</li>
+<li><strong>Calibrations (φ and the antenna table)</strong> — <strong>data collection</strong> is unavailable in this mode and requires <code>geographic</code>. <strong>Applying</strong> an already loaded table works.</li>
+<li>A <strong>reference beacon</strong> is not added to its own track; its coordinates are entered by the user and remain fixed.</li>
+</ul>
+<h3 id="common-problems">Common problems</h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Position does not update</td>
+<td>DH filter rejects all positions</td>
+<td>Increase <strong>Max. vessel speed</strong> in settings</td>
+</tr>
+<tr>
+<td>Reference beacon jumps on the map</td>
+<td>No anchor is set</td>
+<td>Remove and add the reference beacon again</td>
+</tr>
+<tr>
+<td>Accuracy is always ±0.0 m</td>
+<td>Only 1 reference beacon</td>
+<td>This is normal. Add a second beacon for an estimate</td>
+</tr>
+<tr>
+<td>GNSS row is missing</td>
+<td>No GNSS in the log/port</td>
+<td>This is normal. The row appears when GNSS data is available</td>
+</tr>
+<tr>
+<td>Beacon jumps far away after DH filtering</td>
+<td>Threshold is too low</td>
+<td>Increase <strong>Max. vessel speed</strong></td>
+</tr>
+<tr>
+<td>Position age is extremely large</td>
+<td>Version bug</td>
+<td>Update the application; fixed in 1.4.0</td>
+</tr>
+<tr>
+<td>Position does not update even though heading is set</td>
+<td>Heading was entered in Full positioning mode</td>
+<td>Switch to <strong>🧭 Heading only</strong> or clear the lat/lon fields</td>
+</tr>
+<tr>
+<td>⚓ panel closes after setting heading</td>
+<td>Expected when heading is set from the ⚓ panel using 🧭</td>
+<td>The ⚓ panel returns automatically after applying heading. If it does not, open it manually through <strong>🔧 Tools → ⚓ Reference beacons</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="working-with-beacons">Working with beacons</h2>
+<h3 id="address-mask">Address mask</h3>
+<p>Choose which beacons to interrogate in settings (addresses 1–16). Enter the mask as a number, the sum of its bits, or use the checkboxes.</p>
+<h3 id="display">Display</h3>
+<ul>
+<li><strong>Colored circle</strong> — beacon within coverage</li>
+<li><strong>Gray cross</strong> — point rejected by the filter</li>
+<li><strong>✕ icon</strong> — timeout; no response for &gt; 20 s</li>
+<li><strong>! icon</strong> — stale data; &gt; 8 s</li>
+</ul>
+<h3 id="beacon-filter-dh">Beacon filter (DH)</h3>
+<p>Configure it in <strong>⚙ Settings</strong>:</p>
+<ul>
+<li><strong>Max. speed</strong> — beacon points implying movement faster than this speed are discarded (0.5–5 m/s).</li>
+<li>The filter adapts to range: the threshold increases at longer distances.</li>
+</ul>
+<h3 id="coordinate-smoothing">Coordinate smoothing</h3>
+<ul>
+<li>At ranges <strong>up to 1000 m</strong> — a median filter with a 5-point window</li>
+<li>At ranges <strong>over 1000 m</strong> — no smoothing</li>
+</ul>
+<hr>
+<h2 id="tracks">Tracks</h2>
+<h3 id="station-antenna-track">Station (antenna) track</h3>
+<p>The track is built automatically when GNSS data is available and appears as a light-blue line.</p>
+<h3 id="beacon-tracks">Beacon tracks</h3>
+<p>Each beacon has its own track, shown as a colored line. Points are added after passing the DH filter.</p>
+<h3 id="track-controls">Track controls</h3>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>📐 Tracks</td>
+<td>Show/hide all tracks</td>
+</tr>
+<tr>
+<td>🗑 Clear</td>
+<td>Delete all tracks, with confirmation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="track-settings-settings">Track settings (⚙ Settings)</h3>
+<ul>
+<li><strong>Max. points on screen</strong> — track length limit (50–10000)</li>
+<li><strong>Min. distance</strong> — minimum distance between points (0.1–50 m)</li>
+</ul>
+<hr>
+<h2 id="calibration">Calibration</h2>
+<h3 id="φ-calibration-using-a-known-point">φ calibration using a known point</h3>
+<p><strong>Purpose</strong>: calculate the antenna angular offset (φ) from <strong>a single beacon with known coordinates</strong> and its accumulated track. This is the simplest, most accurate, and preferred method when a beacon can be placed stationary at a point with known coordinates.</p>
+<p><strong>When to use it:</strong></p>
+<ul>
+<li>A transponder beacon with <strong>precisely known coordinates</strong> is available, installed on the seabed at a known point or on a buoy at a known position.</li>
+<li>A track of this beacon has already been accumulated; the beacon has been interrogated long enough.</li>
+<li>Geographic positioning has been performed for geographic, or ⚓ mode is active for <code>beacon_referenced</code>.</li>
+</ul>
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Accumulate the beacon track: start interrogation (▶ Interrogate) or play a log (📋 Log → ▶ Play). At least 3 track points are required.</li>
+<li>Open 🔧 Tools → 🔧 Calibrations → 🔧 φ calibration (known point).
+<ul>
+<li>The application calculates DRMS for all tracks and opens the report window.</li>
+<li>A 🔧 φ calibration using a known point section appears below the report.</li>
+</ul>
+</li>
+<li>If multiple tracks exist, select the desired <strong>beacon</strong> from the dropdown.</li>
+<li>The section shows the <strong>track centroid</strong> — the average position of the accumulated beacon coordinates.</li>
+<li>Enter the <strong>actual beacon coordinates</strong> (latitude and longitude).</li>
+<li>Click <strong>Calculate φ</strong>. The application compares the bearing from the antenna to the centroid with the bearing to the actual point. The difference is φ.</li>
+<li>Verify the result and click <strong>✓ Apply φ</strong>. The value is saved in settings and used when recalculating coordinates.</li>
+<li>If needed, click <strong>✓ Apply</strong> in settings (<strong>⚙ Settings → Apply</strong>) so the new φ value takes effect for all beacons.</li>
+</ol>
+<p><strong>How it works:</strong></p>
+<ul>
+<li><strong>Track centroid</strong> — the averaged beacon position over the accumulated points, in <code>geographic</code>.</li>
+<li><strong>Actual point</strong> — coordinates entered by the operator.</li>
+<li><strong>Bearing to centroid</strong> — calculated from antenna coordinates.</li>
+<li><strong>Bearing to the actual point</strong> — calculated from the same antenna coordinates.</li>
+<li><strong>φ</strong> — the difference between these bearings, in degrees, −180…+180.</li>
+</ul>
+<p><strong>Accuracy depends on:</strong></p>
+<ul>
+<li><strong>Accuracy of the beacon coordinates</strong> — if the actual point is known with error, φ will be off by the same error.</li>
+<li><strong>Accuracy of the antenna coordinates</strong> — if geographic positioning is coarse, the bearing is calculated inaccurately.</li>
+<li><strong>Number of track points</strong> — more points give a more accurate centroid.</li>
+</ul>
+<blockquote>
+<p><strong>Tip</strong>: if multiple beacons with known coordinates are available, run the calibration for each and compare the resulting φ values. Close values confirm the calibration is correct.</p>
+</blockquote>
+<blockquote>
+<p><strong>Limitation</strong>: in 📐 Cartesian mode (stationary antenna at (0, 0, 0)), this calibration is unavailable, since there are no geographic coordinates for bearing calculations. It works in 🌍 Geographic and ⚓ Reference beacons modes when antenna and beacon coordinates are available.</p>
+</blockquote>
+<p><strong>Access via menu: 🔧 Tools → 🔧 Calibrations → 🔧 φ calibration (known point)</strong></p>
+<h3 id="φ-calibration-by-point-cloud">φ calibration by point cloud</h3>
+<p><strong>Purpose:</strong> compensate for the angle between the antenna zero direction and the vessel centerline.</p>
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Open <strong>🔧 Tools → 🔧 Calibrations → 🔧 φ calibration (point cloud)</strong>.</li>
+<li>Set the parameters:
+<ul>
+<li><strong>Start angle/End angle</strong> — search range, usually 0°–360°.</li>
+<li><strong>Step</strong> — fitting precision, usually 1°.</li>
+<li><strong>Points</strong> — maximum number of measurements, usually 100.</li>
+</ul>
+</li>
+<li>Click <strong>▶ Start</strong>.</li>
+<li>Maneuver the vessel, circling the beacon or moving along a straight line.</li>
+<li>Point collection stops automatically at the limit, or click <strong>⏹ Stop</strong>.</li>
+<li>Confirm that the φ value should be applied.</li>
+</ol>
+<p><strong>How it works:</strong> tries φ values at the specified step, calculates DRMS for the beacon point cloud for each value, and selects the φ with the lowest DRMS.</p>
+<blockquote>
+<p><strong>Important:</strong> φ calibration can use either of two arrangements. In the first, the beacon is stationary and the vessel maneuvers so that the beacon is observed at different angles. In the second, the antenna must be stationary and the beacon must move to cover the widest possible range of angles.</p>
+</blockquote>
+<h3 id="antenna-calibration-correction-table">Antenna calibration: correction table</h3>
+<p><strong>Purpose:</strong> build an antenna correction table as a function of encoder angle (0°–360°).</p>
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Open <strong>🔧 Tools → 🔧 Calibrations → ⚠📡 Antenna calibration (table)</strong>.</li>
+<li>Set the <strong>Angle step</strong>, usually 1°–5°.</li>
+<li>Click <strong>▶ Start</strong>.</li>
+<li>Maneuver the vessel around the beacon in a circle, or rotate the antenna in place.</li>
+<li>Watch the point counter and centroid.</li>
+<li>After collecting enough points, click <strong>🔨 Build</strong>.</li>
+<li>If coverage is sufficient, click <strong>✓ Apply</strong>.</li>
+<li>Alternatively, save the table to CSV using <strong>💾 Download</strong>.</li>
+</ol>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>Collects points: heading, measured azimuth, and coordinates</li>
+<li>Calculates the centroid, the arithmetic mean of beacon coordinates</li>
+<li>Calculates the true bearing to the centroid for each point</li>
+<li>Groups errors by encoder sector</li>
+<li>Averages errors in each sector</li>
+<li>Applies the table through AntennaCorrector</li>
+</ul>
+<blockquote>
+<p><strong>Requirements:</strong> geographic positioning (coordinates and heading), a stationary beacon, and a maneuver covering different angles.</p>
+</blockquote>
+<h3 id="loading-a-calibration-table">Loading a calibration table</h3>
+<p>In <strong>⚙ Settings → 📏 Antenna offsets → Calibration</strong>:</p>
+<ul>
+<li><strong>📂 Load</strong> — load the table from a CSV file.</li>
+<li><strong>🗑 Reset</strong> — clear the table.</li>
+</ul>
+<hr>
+<h2 id="points-of-interest-poi">Points of interest (POI)</h2>
+<p><strong>Purpose:</strong> save points on the map for navigation and documentation.</p>
+<h3 id="poi-types">POI types</h3>
+<ul>
+<li><strong>📍 Loaded</strong> — imported from CSV, such as target points for an ROV</li>
+<li><strong>⭐ Marked</strong> — saved by the operator during work</li>
+</ul>
+<h3 id="loading-poi-from-csv">Loading POI from CSV</h3>
+<ol>
+<li>Choose <strong>🔧 Tools → 📍 POI → 📂 Load from CSV</strong>.</li>
+<li>Select a file with columns in this order: name, latitude, longitude, depth. See the <a href="#poi-csv">POI CSV example</a>.</li>
+<li>POI appear on the map as pins (📍).</li>
+</ol>
+<h3 id="marking-the-current-beacon-position">Marking the current beacon position</h3>
+<p>Click <strong>📌</strong> on the beacon card. A POI is created with the beacon coordinates and the time it was marked.</p>
+<h3 id="exporting-poi">Exporting POI</h3>
+<ul>
+<li><strong>💾 Save to CSV</strong> — the complete POI list.</li>
+<li><strong>🗺 KML</strong> — POI are included in KML together with tracks; loaded POI use a yellow pin and marked POI use a star.</li>
+</ul>
+<h3 id="clearing-poi">Clearing POI</h3>
+<ul>
+<li><strong>🗑 Clear all</strong> — deletes all POI, with confirmation.</li>
+<li>POI persist between sessions in <code>localStorage</code>.</li>
+</ul>
+<hr>
+<h2 id="recording-and-playing-logs">Recording and playing logs</h2>
+<h3 id="recording-a-log">Recording a log</h3>
+<p>Recording starts automatically when connected to Zima2. All incoming and outgoing messages are recorded.</p>
+<h3 id="saving-a-log">Saving a log</h3>
+<ul>
+<li><strong>📋 Log → 💾 Save</strong> — download the log file.</li>
+<li>When disconnecting from Zima2, the application offers to save the log if it contains more than 10 entries.</li>
+</ul>
+<h3 id="loading-and-playback">Loading and playback</h3>
+<ol>
+<li><strong>📋 Log → 📂 Open</strong> — load a log file (.log/.txt).</li>
+<li><strong>📋 Log → ▶ Play</strong> — start playback.</li>
+<li>During playback:
+<ul>
+<li>All functions remain available: tracks, beacons, and calibration.</li>
+<li>Speed controls: <strong>−</strong> / <strong>1x</strong> / <strong>+</strong> (1x, 2x, 4x, 8x).</li>
+<li>The progress bar shows the current position in the log.</li>
+</ul>
+</li>
+<li><strong>⏹ Stop</strong> — end playback.</li>
+</ol>
+<blockquote>
+<p>The <strong>log format</strong> is compatible with AzimuthSuite (C#).</p>
+</blockquote>
+<hr>
+<h2 id="log-analysis">Log analysis</h2>
+<p><strong>📋 Log → 🔍 Analyze</strong></p>
+<p>Displays statistics for the loaded log:</p>
+<ul>
+<li>Number of entries</li>
+<li>Beacon statistics: successful responses and timeouts</li>
+<li>Compass data: minimum/maximum heading and anomaly detection</li>
+</ul>
+<p>The <strong>📋 Copy</strong> button copies the report to the clipboard.</p>
+<hr>
+<h2 id="data-export">Data export</h2>
+<p>All formats are available through <strong>📤 Export</strong>.</p>
+<h3 id="csv">CSV</h3>
+<p>Beacon and station tracks in tabular form: time, coordinates, depth, range, and azimuth.</p>
+<h3 id="nmea-gga-beacon">NMEA GGA (Beacon)</h3>
+<p>Emulates a GPS receiver for each beacon. Beacon identifiers are <code>B01</code>…<code>B10</code> (hex).</p>
+<h3 id="nmea-gga-antenna">NMEA GGA (Antenna)</h3>
+<p>Antenna track in GGA format. Duplicates are filtered at distances &lt; 10 cm.</p>
+<h3 id="nmea-psimssb-head-up">NMEA PSIMSSB (Head-Up)</h3>
+<p>Beacon coordinates relative to the antenna: X, Y, Z in meters. Compatible with the HiPAP format.</p>
+<h3 id="nmea-psimssb-utm">NMEA PSIMSSB UTM</h3>
+<p>Absolute beacon coordinates in the UTM projection (Easting, Northing).</p>
+<h3 id="kml">KML</h3>
+<p>Beacon and station tracks for Google Earth/QGIS. Includes POI if available.</p>
+<hr>
+<h2 id="drms-report">DRMS report</h2>
+<p><strong>Purpose:</strong> assess beacon positioning accuracy.</p>
+<p><strong>🔧 Tools → 📊 DRMS report</strong></p>
+<p>Calculates the following for each beacon:</p>
+<ul>
+<li><strong>DRMS</strong> (Distance Root Mean Square) — root mean square deviation</li>
+<li><strong>2DRMS</strong> — twice DRMS (approximately a 95% confidence interval)</li>
+<li><strong>3DRMS</strong> — three times DRMS (approximately a 99% confidence interval)</li>
+<li><strong>σX, σY</strong> — standard deviations along the axes</li>
+<li><strong>Centroid</strong> — arithmetic mean of coordinates</li>
+</ul>
+<p><strong>Report format:</strong></p>
+<pre><code class="language-text">Beacon #1: DRMS=1.23m, 2DRMS=2.46m, 3DRMS=3.69m, σX=0.87m, σY=0.87m, points=342
+</code></pre>
+<p>The <strong>💾 Download CSV</strong> button saves the complete table, including centroid coordinates.</p>
+<blockquote>
+<p><strong>φ calibration using a known point</strong>: below the DRMS report (only in <strong>🌍 Geographic</strong> and <strong>⚓ Reference beacons</strong> modes) a section appears for calculating φ from a beacon with known coordinates. See φ calibration using a known point.</p>
+</blockquote>
+<hr>
+<h2 id="ruler">Ruler</h2>
+<p>Measures distances on the map.</p>
+<ol>
+<li>Click <strong>📏 Ruler</strong>.</li>
+<li>Click the first point on the map.</li>
+<li>Move the mouse; a line follows the pointer and displays the distance.</li>
+<li>Click the second point.</li>
+<li>Click again to start a new measurement.</li>
+</ol>
+<p>The ruler recalculates when the map is panned or zoomed during measurement.</p>
+<hr>
+<h2 id="themes">Themes</h2>
+<p>Use <strong>🎨</strong> to cycle through the themes.</p>
+<table>
+<thead>
+<tr>
+<th>Theme</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Indoor</td>
+<td>Dark blue, for indoor use; default</td>
+</tr>
+<tr>
+<td>Light</td>
+<td>Light theme, for bright sunlight</td>
+</tr>
+<tr>
+<td>Dark Contrast</td>
+<td>Black background with bright accents</td>
+</tr>
+<tr>
+<td>Jack Black</td>
+<td>Black background, white text, gray accents</td>
+</tr>
+<tr>
+<td>Jack White</td>
+<td>White background, black text, gray accents</td>
+</tr>
+<tr>
+<td>VAX</td>
+<td>Green text on black, styled after VAX/VT terminals</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="settings">Settings</h2>
+<p><strong>⚙ Settings</strong> opens a modal window with the following sections.</p>
+<h3 id="interrogation-settings">Interrogation settings</h3>
+<ul>
+<li><strong>Address mask</strong> — which beacons to interrogate (1–65535)</li>
+<li><strong>Max. range</strong> — interrogation range limit (100–5000 m)</li>
+<li><strong>Salinity</strong> — used to calculate sound speed (0–40 PSU)</li>
+<li><strong>Sound speed</strong> — entered manually or calculated automatically from temperature and salinity</li>
+</ul>
+<h3 id="gnss-compass">GNSS compass</h3>
+<ul>
+<li><strong>Compass mode</strong> — Auto (prefer HDT), HDT only (True), or Magnetic only</li>
+<li><strong>Baud rate</strong> — 4800–115200 baud</li>
+</ul>
+<h3 id="antenna-offsets">Antenna offsets</h3>
+<ul>
+<li><strong>X, Y</strong> — linear antenna offset from the vessel's point of rotation, in meters</li>
+<li><strong>Antenna φ</strong> — angular offset in degrees</li>
+<li><strong>Calibration</strong> — load/reset a calibration table</li>
+</ul>
+<h3 id="antenna-mode">Antenna mode</h3>
+<ul>
+<li><strong>🌍 Geographic</strong> — standard mode with geographic positioning: antenna coordinates and heading.</li>
+<li><strong>📐 Cartesian (stationary)</strong> — the antenna is assumed to be at (0, 0, 0); beacon coordinates are in meters: X → right, Y → forward, Z → depth.</li>
+<li><strong>⚓ Reference beacons</strong> — vessel position is calculated from known reference beacon coordinates without GNSS/geographic positioning. See <a href="#reference-beacon-mode">Reference beacon mode</a>.</li>
+</ul>
+<h3 id="beacon-filter-dh-1">Beacon filter (DH)</h3>
+<ul>
+<li><strong>Max. speed</strong> — filter threshold (0.5–5 m/s)</li>
+</ul>
+<h3 id="vessel-filter-dh-reference-beacon-mode">Vessel filter (DH, reference beacon mode)</h3>
+<p>This subsection appears when <strong>⚓ Reference beacons</strong> mode is active. It controls the vessel position filter, rejecting physically impossible movement.</p>
+<ul>
+<li><strong>Max. vessel speed</strong> — filter threshold (0.5–50 m/s; default: <strong>2.0</strong>). Positions implying movement faster than this speed are discarded.</li>
+<li><strong>Rejected positions</strong> — drawn on the map as gray crosses labeled <strong>REJECTED</strong>, for diagnostics.</li>
+<li><strong>If the vessel position does not update</strong>, increase <strong>Max. vessel speed</strong>.</li>
+</ul>
+<h3 id="beacon-tracks-1">Beacon tracks</h3>
+<ul>
+<li><strong>Max. points on screen</strong> — track length limit (50–10000)</li>
+<li><strong>Min. distance</strong> — track thinning distance (0.1–50 m)</li>
+</ul>
+<hr>
+<h2 id="keyboard-shortcuts-and-gestures">Keyboard shortcuts and gestures</h2>
+<h3 id="mouse">Mouse</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mouse wheel</td>
+<td>Zoom the map</td>
+</tr>
+<tr>
+<td>Drag</td>
+<td>Pan the map</td>
+</tr>
+<tr>
+<td>Double-click the map</td>
+<td>Reset the view to the antenna (scale 100)</td>
+</tr>
+<tr>
+<td>Click a beacon</td>
+<td>Follow the beacon</td>
+</tr>
+<tr>
+<td>Click the map</td>
+<td>Stop following</td>
+</tr>
+</tbody>
+</table>
+<h3 id="touch">Touch</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One finger</td>
+<td>Pan</td>
+</tr>
+<tr>
+<td>Two fingers</td>
+<td>Pinch to zoom</td>
+</tr>
+<tr>
+<td>Double tap</td>
+<td>Reset the view to the antenna</td>
+</tr>
+<tr>
+<td>Tap a beacon</td>
+<td>Follow the beacon</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="file-formats">File formats</h2>
+<h3 id="communication-log-log">Communication log (.log)</h3>
+<pre><code class="language-text">16:05:59.141: INFO: COM17 (GNSS) &gt;&gt; $GPGGA,050558.85,4637.143860,N,14242.139534,E,0,28,1.2,00021.270,M,00000.000,M,2.0,*78
+16:05:59.225: INFO: COM17 (GNSS) &gt;&gt; $GPRMC,050558.85,A,4637.143860,N,14242.139534,E,2.2,65.8,280426,,,D*6C
+16:05:59.225: INFO: COM17 (GNSS) &gt;&gt; $GPHDT,66.8,T*0D
+16:05:59.435: INFO: COM44 (AZM) &gt;&gt; $PAZM3,1,0,0,38,23.8,0.080975,115.3,113.0,22.8,325.8,11.4,1147.22,4.5,,2.6,-2.9*0E
+...
+</code></pre>
+<h3 id="poi-csv">POI (.csv)</h3>
+<p>The original CSV header is retained below. Import reads columns by position rather than by header name, so a header such as <code>Name,Latitude,Longitude,Depth</code> is also accepted. Depth can be omitted.</p>
+<pre><code class="language-csv">Название,Широта,Долгота,Глубина
+Approach point,55.123456,37.654321,15.5
+Object A,55.345678,37.876543,
+</code></pre>
+<h3 id="calibration-table-csv">Calibration table (.csv)</h3>
+<pre><code class="language-csv"># Angle_deg;Error_deg
+5.000;1.234567
+15.000;2.345678
+</code></pre>
+<h3 id="drms-report-csv">DRMS report (.csv)</h3>
+<pre><code class="language-csv">Beacon,Points,DRMS_m,2DRMS_m,3DRMS_m,SigmaX_m,SigmaY_m,CentroidLat,CentroidLon
+1,342,1.234,2.468,3.702,0.872,0.873,55.12345678,37.65432190
+</code></pre>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="cannot-connect-to-zima2">Cannot connect to Zima2</h3>
+<ul>
+<li>Make sure another application is not using the port.</li>
+<li>Check the baud rate; it must be 9600 baud.</li>
+<li>Try reconnecting the USB cable.</li>
+<li>Reload the page.</li>
+</ul>
+<h3 id="beacons-are-not-displayed">Beacons are not displayed</h3>
+<ul>
+<li>Check the address mask in settings.</li>
+<li>Make sure the beacon is within coverage: range &lt; maximum range.</li>
+<li>Check that interrogation is active; the indicator should flash.</li>
+</ul>
+<h3 id="beacons-have-no-coordinates">Beacons have no coordinates</h3>
+<ul>
+<li>Set up geographic positioning manually or connect GNSS.</li>
+<li>Coordinates appear only after the point passes the DH filter.</li>
+</ul>
+<h3 id="the-application-slows-down-during-log-playback">The application slows down during log playback</h3>
+<ul>
+<li>Reduce playback speed to 1x.</li>
+<li>Hide tracks using <strong>📐 Tracks</strong>.</li>
+<li>Close panels you are not using.</li>
+</ul>
+<h3 id="calibration-produces-no-result">Calibration produces no result</h3>
+<ul>
+<li>Make sure the beacon is stationary.</li>
+<li>Collect more points at different headings.</li>
+<li>Check geographic positioning.</li>
+<li>Increase the angle step when building the table.</li>
+</ul>
+<h3 id="position-does-not-update-in-reference-beacons-mode">Position does not update in Reference beacons mode</h3>
+<ul>
+<li>Check that a <strong>reference beacon has been added</strong> in <strong>🔧 Tools → ⚓ Reference beacons</strong>.</li>
+<li>Check that <strong>antenna heading is not NaN</strong>; calculation is impossible without heading. Connect a GNSS compass or check the built-in Zima2 compass.</li>
+<li>Check that the <strong>beacon is being interrogated</strong>. Its address must be included in the <strong>Address mask</strong> under <strong>⚙ Settings → 📡 Interrogation settings</strong>, and interrogation must be <strong>active</strong> using <strong>▶ Interrogate</strong>.</li>
+<li>Increase <strong>Max. vessel speed</strong> under <strong>⚙ Settings → ⚓ Vessel filter (DH, reference beacon mode)</strong>. If the threshold is too low, the DH filter rejects all positions.</li>
+<li><strong>Rejected positions</strong> appear as gray crosses labeled <strong>REJECTED</strong>. Many such crosses indicate that the threshold is too low.</li>
+</ul>
+<h3 id="a-reference-beacon-jumps-on-the-map">A reference beacon jumps on the map</h3>
+<ul>
+<li>The <strong>anchor</strong> (world reference point) is probably <strong>not set</strong>. Remove the reference beacon and add it again; adding a beacon sets the anchor automatically.</li>
+<li>Alternatively, switch to <strong>Geographic</strong> mode and back, or <strong>restart playback</strong>; <code>togglePlayback</code> also sets the anchor.</li>
+<li>Check that the reference beacon's <strong><code>ref.lat/ref.lon</code></strong> values are entered <strong>correctly</strong>, for example in the reference beacon panel.</li>
+</ul>
+<h3 id="accuracy-is-always-00-m">Accuracy is always ±0.0 m</h3>
+<ul>
+<li>This is <strong>normal</strong> with <strong>one</strong> reference beacon. <code>spread = 0</code> by definition, and <strong>⚓ Accuracy</strong> is hidden in the antenna panel.</li>
+<li><strong>Accuracy assessment</strong> requires <strong>2+</strong> reference beacons. The farther apart they are, the more informative <code>spread</code> becomes.</li>
+</ul>
+<h3 id="the-gnss-row-is-missing-from-the-antenna-panel">The GNSS row is missing from the antenna panel</h3>
+<ul>
+<li>This is <strong>normal</strong> when there is <strong>no GNSS data</strong> in the current log/port. The <strong>GNSS</strong> row appears <strong>only</strong> when data is available.</li>
+<li>If GNSS <strong>is available</strong> but the row is missing, check that <strong>⚓ Reference beacons</strong> mode is active and GNSS messages are <strong>being parsed</strong> (<code>$xxRMC</code>).</li>
+</ul>
+<h3 id="vessel-position-age-shows-billions-of-seconds">Vessel position age shows billions of seconds</h3>
+<ul>
+<li>This is a <strong>bug</strong> in versions <strong>before 1.4.0</strong>: virtual Playback time was compared with real <code>Date.now()</code>.</li>
+<li><strong>Solution:</strong> update the application to <strong>1.4.0</strong> or later.</li>
+</ul>
+<h3 id="φ-or-table-calibration-does-not-work-in-reference-beacons-mode">φ or table calibration does not work in Reference beacons mode</h3>
+<ul>
+<li>Calibration <strong>data collection</strong> is <strong>unavailable</strong> in this mode. It requires full <code>geographic</code> mode with antenna coordinates from GNSS/manual positioning.</li>
+<li><strong>Applying</strong> an already loaded table/φ works. Load it beforehand in <code>geographic</code>, save it in settings, and switch to <code>beacon_referenced</code>.</li>
+</ul>
+<h3 id="the-station-track-breaks-after-leaving-reference-beacons-mode">The station track breaks after leaving Reference beacons mode</h3>
+<ul>
+<li>Check <strong><code>TrackManager.getAnchor()</code></strong>. If it still contains reference beacon coordinates, they should <strong>reset</strong> on the next GNSS update.</li>
+<li>If they <strong>do not reset</strong>, reload the page or explicitly switch to <code>geographic</code>.</li>
+</ul>
+<h2 id="additional-links">Additional links</h2>
+<ul>
+<li><a href="../CHANGELOG.html">📋 Version history (CHANGELOG)</a></li>
+<li><a href="https://github.com/ucnl/AzimuthWebSuite/">⭐ GitHub repository</a></li>
+<li><a href="https://github.com/ucnl/AzimuthWebSuite/blob/main/LICENSE">⚖️ GNU GPL v3.0 License</a></li>
+</ul>
+<p>© 2026 <a href="https://unavlab.com">UC&amp;NL</a></p>
+</body></html>

@@ -1,0 +1,558 @@
+<!-- index.html — Zima2 USBL Web PWA (структура) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>AzimuthWebSuite</title>
+    <link rel="stylesheet" href="styles.css">
+	<link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div id="app">
+        <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
+        <div id="top-bar">
+            <div id="connection-indicator" title="Connection status" data-i18n-title="main.connectionStatus"></div>
+            <span id="device-label">Zima2 USBL</span>
+            <select class="language-selector" data-language-selector data-i18n-aria-label="main.language" data-i18n-title="main.language" aria-label="Language" title="Language"></select>
+            <span id="status-text" data-i18n="main.disconnected">Disconnected</span>
+
+			<button id="btn-theme" class="top-btn btn-theme" onclick="App.cycleTheme()" title="Theme" data-i18n-title="main.theme">🎨</button>
+            <button id="btn-connection" class="top-btn btn-connect" onclick="App.toggleConnection()">🔌 AZM</button>
+			<button id="btn-gnss" class="top-btn btn-gnss" onclick="App.toggleGNSS()">📡 GNSS</button>
+			<button id="btn-interrogation" class="top-btn btn-start" onclick="App.toggleInterrogation()" disabled data-i18n="main.interrogate">▶ Interrogate</button>
+            <button id="btn-settings" class="top-btn btn-settings" onclick="App.openSettings()"  data-i18n="main.settings">⚙ Settings</button>
+
+			<!-- Выпадающая кнопка Инструменты -->
+			<div class="dropdown" style="display:inline-block; position:relative;">
+				<button class="top-btn btn-tools" onclick="App.toggleDropdown('tools-dropdown')" data-i18n="main.tools">🔧 Tools ▾</button>
+				<div id="tools-dropdown" class="dropdown-menu">
+
+				    <div class="dropdown-item" onclick="UIWizard.resetWizard(); UIWizard.show(); App.closeAllDropdowns();" data-i18n="main.wizard">⚙ Setup wizard</div>
+
+					<div class="dropdown-item" onclick="App.toggleTopoPanel(); App.closeAllDropdowns();" data-i18n="main.manualTopo">🌐 Manual positioning</div>
+
+					<div class="dropdown-item" onclick="App.toggleReferencePanel(); App.closeAllDropdowns();" data-i18n="main.referenceBeacons">⚓ Reference beacons</div>
+
+					<div class="dropdown-item" onclick="App.exportDRMS(); App.closeAllDropdowns();" data-i18n="main.drmsReport">📊 DRMS report</div>
+
+					<!-- Подменю POI -->
+					<div class="dropdown-item"><span data-i18n="main.poiMenu">📍 POI ▸</span><div class="submenu">
+						<div class="dropdown-item" onclick="App.loadPOI(); App.closeAllDropdowns();" data-i18n="main.loadCSV">📂 Load from CSV</div>
+						<div class="dropdown-item" onclick="App.exportPOI_CSV(); App.closeAllDropdowns();" data-i18n="main.saveCSV">💾 Save to CSV</div>
+						<div class="dropdown-item" onclick="App.clearPOI(); App.closeAllDropdowns();" data-i18n="main.clearAll">🗑 Clear all</div>
+						</div>
+					</div>
+
+                    <div class="dropdown-item" onclick="window.open('tools/coord-converter.html','_blank'); App.closeAllDropdowns();" data-i18n="main.coordinateConverter">🔄 Coordinate converter</div>
+					<div class="dropdown-item" onclick="window.open('tools/azmclogparser.html','_blank'); App.closeAllDropdowns();" data-i18n="main.logParser">🔄 AzimuthConsole log parser</div>
+
+					<!-- Подменю Калибровки -->
+					<div class="dropdown-item"><span data-i18n="main.calibrationsMenu">🔧 Calibrations ▸</span><div class="submenu">
+						<div class="dropdown-item" onclick="App.toggleCalibration(); App.closeAllDropdowns();" data-i18n="main.phiCloud">🔧 φ calibration (point cloud)</div>
+						<div class="dropdown-item" onclick="App.openDRMSWithPhi(); App.closeAllDropdowns();" data-i18n="main.phiKnown">🔧 φ calibration (known point)</div>
+						<div class="dropdown-item" onclick="App.toggleAntennaCalibration(); App.closeAllDropdowns();" data-i18n="main.antennaTableWarning">⚠📡 Antenna calibration (table)</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<!-- Выпадающая кнопка Экспорт -->
+			<div class="dropdown" style="display:inline-block; position:relative;">
+				<button class="top-btn btn-export" onclick="App.toggleDropdown('export-dropdown')" data-i18n="main.export">📤 Export ▾</button>
+				<div id="export-dropdown" class="dropdown-menu">
+					<div class="dropdown-item" onclick="App.exportCSV(); App.closeAllDropdowns();" data-i18n="main.csvTracks">📊 CSV (Antenna + beacon)</div>
+					<div class="dropdown-item" onclick="App.exportGGA(); App.closeAllDropdowns();" data-i18n="main.ggaBeacon">📡 NMEA GGA (Beacon)</div>
+					<div class="dropdown-item" onclick="App.exportAntennaGGA(); App.closeAllDropdowns();" data-i18n="main.ggaAntenna">📡 NMEA GGA (Antenna)</div>
+					<div class="dropdown-item" onclick="App.exportPSIMSSB(); App.closeAllDropdowns();" data-i18n="main.psimBeacon">📡 NMEA PSIMSSB (Beacon)</div>
+					<div class="dropdown-item" onclick="App.exportPSIMSSB_NE(); App.closeAllDropdowns();" data-i18n="main.psimUTM">📡 NMEA PSIMSSB UTM (Beacon)</div>
+					<div class="dropdown-item" onclick="App.exportDXF(); App.closeAllDropdowns();">📐 DXF (CAD)</div>
+					<div class="dropdown-item" onclick="App.exportTracksKML(); App.closeAllDropdowns();">🗺 KML</div>
+				</div>
+			</div>
+
+			<!-- Выпадающая кнопка Лог -->
+			<div class="dropdown" style="display:inline-block; position:relative;">
+				<button class="top-btn btn-log" onclick="App.toggleDropdown('log-dropdown')" data-i18n="main.logMenu">📋 Log ▾</button>
+				<div id="log-dropdown" class="dropdown-menu">
+					<div class="dropdown-item" onclick="App.saveLog(); App.closeAllDropdowns();" data-i18n="main.save">💾 Save</div>
+					<div id="log-load-item" class="dropdown-item" onclick="App.loadLog(); App.closeAllDropdowns();" data-i18n="main.open">📂 Open</div>
+					<div class="dropdown-item" onclick="App.showLogAnalysis(); App.closeAllDropdowns();" data-i18n="main.analyze">🔍 Analyze</div>
+					<div id="log-play-item" class="dropdown-item" onclick="App.togglePlayback(); App.closeAllDropdowns();" data-i18n="main.play">▶ Play</div>
+					<div id="log-stop-item" class="dropdown-item" onclick="App.togglePlayback(); App.closeAllDropdowns();" style="display:none;" data-i18n="main.stopPlayback">⏹ Stop</div>
+				</div>
+			</div>
+
+        </div>
+
+        <!-- ===== КАРТА ===== -->
+        <div id="map-container">
+            <canvas id="map-canvas"></canvas>
+
+            <!-- Информация антенны -->
+            <div id="antenna-info">
+			<div><span class="ai-label" data-i18n="main.latitude">Latitude:</span> <span class="ai-value" id="ai-lat">--</span></div>
+			<div><span class="ai-label" data-i18n="main.longitude">Longitude:</span> <span class="ai-value" id="ai-lon">--</span></div>
+			<div id="ai-quality-row">
+				<span class="ai-label" data-i18n="main.accuracy">⚓ Accuracy:</span> <span class="ai-value quality-none" id="ai-quality">--</span>
+			</div>
+			<div id="ai-gnss-row">
+				<div><span class="ai-label">GNSS:</span> <span class="ai-value" id="ai-gnss-lat">--</span></div>
+				<div><span class="ai-label"></span> <span class="ai-value" id="ai-gnss-lon">--</span></div>
+				<div><span class="ai-label" data-i18n="main.difference">Difference:</span> <span class="ai-value" id="ai-diff">--</span></div>
+			</div>
+			<div><span class="ai-label" data-i18n="main.azimuth">Azimuth:</span> <span class="ai-value" id="ai-hdg">--</span>°</div>
+				<div><span class="ai-label" data-i18n="main.speed">Speed:</span> <span class="ai-value" id="ai-spd">--</span> <span data-i18n="main.metersPerSecond">m/s</span></div>
+				<div><span class="ai-label" data-i18n="main.course">Course:</span> <span class="ai-value" id="ai-crs">--</span>°</div>
+				<div><span class="ai-label" data-i18n="main.depth">Depth:</span> <span class="ai-value" id="ai-dpt">--</span> <span data-i18n="main.meters">m</span></div>
+				<div><span class="ai-label" data-i18n="main.temperature">Temp.:</span> <span class="ai-value" id="ai-tmp">--</span>°C</div>
+				<div><span class="ai-label" data-i18n="main.pitch">Pitch:</span> <span class="ai-value" id="ai-pitch">--</span>°</div>
+				<div><span class="ai-label" data-i18n="main.roll">Roll:</span> <span class="ai-value" id="ai-roll">--</span>°</div>
+			</div>
+
+			 <!-- Управление треками -->
+			<div id="tracks-control">
+				<button class="track-btn active" id="btn-tracks-show" onclick="App.toggleTracks()" data-i18n="main.tracks">📐 Tracks</button>
+				<button class="track-btn" id="btn-tracks-clear" onclick="App.clearTracks()" data-i18n="main.clear">🗑 Clear</button>
+				<button id="btn-ruler" class="track-btn" onclick="App.toggleRuler()" data-i18n="main.ruler">📏 Ruler</button>
+
+				<div id="playback-progress">
+					<div id="playback-progress-fill"></div>
+				</div>
+				<div id="playback-speed-control">
+					<button id="btn-speed-down" class="track-btn">−</button>
+					<span id="playback-speed-current">1x</span>
+					<button id="btn-speed-up" class="track-btn">+</button>
+				</div>
+
+			</div>
+
+            <!-- Шкала -->
+            <div id="scale-bar"></div>
+
+            <!-- Панель топопривязки -->
+			<div id="topo-panel">
+				<h3 data-i18n="main.topoTitle">🌐 Positioning</h3>
+				<div id="topo-gnss-status" data-i18n="main.gnssDisconnected">External GNSS is disconnected</div>
+
+				<div class="topo-row">
+					<label data-i18n="main.mode">Mode:</label>
+					<select id="topo-mode" class="panel-select">
+						<option value="full" data-i18n="main.topoFull">🌍 Full (lat/lon + heading)</option>
+						<option value="heading_only" data-i18n="main.topoHeading">🧭 Heading only (for ⚓)</option>
+					</select>
+				</div>
+
+				<div id="topo-hint" class="topo-hint" style="display:none;"></div>
+
+				<div class="topo-row">
+					<label data-i18n="main.latitude">Latitude:</label>
+					<input type="text" id="topo-lat" placeholder="55.123456" data-i18n-placeholder="main.latitudeExample">
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.longitude">Longitude:</label>
+					<input type="text" id="topo-lon" placeholder="37.654321" data-i18n-placeholder="main.longitudeExample">
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.courseDegrees">Heading (°):</label>
+					<input type="number" id="topo-hdg" placeholder="0" data-i18n-placeholder="main.zeroExample" min="0" max="360" step="0.1" value="0">
+				</div>
+				<div class="topo-buttons">
+					<button class="btn-get-gnss" onclick="App.getPhoneGPS()">📱 GPS</button>
+					<button class="btn-apply-topo" onclick="App.applyTopoBinding()" data-i18n="main.apply">✓ Apply</button>
+					<button class="btn-cancel-topo" onclick="App.toggleTopoPanel()" data-i18n="main.cancel">✕ Cancel</button>
+					<button class="btn-reset-topo" onclick="App.clearTopoBinding()" data-i18n="main.reset">🗑 Reset</button>
+				</div>
+			</div>
+
+			<!-- Панель опорных маяков -->
+			<div id="reference-panel">
+				<h3 class="panel-title panel-title-accent" data-i18n="main.referenceBeacons">⚓ Reference beacons</h3>
+
+				<div id="ref-status" class="panel-subtitle" data-i18n="main.inactive">Mode is inactive</div>
+
+				<div id="ref-list" style="margin-bottom:12px;"></div>
+
+				<div class="panel-divider">
+					<h4 class="panel-subtitle" style="text-align:left; margin-bottom:8px;" data-i18n="main.addReference">Add a reference beacon</h4>
+					<div class="topo-row">
+						<label data-i18n="main.beacon">Beacon:</label>
+						<select id="ref-addr" class="panel-select"></select>
+					</div>
+					<div class="topo-row">
+						<label data-i18n="main.latitude">Latitude:</label>
+						<input type="text" id="ref-lat" placeholder="55.123456" data-i18n-placeholder="main.latitudeExample">
+					</div>
+					<div class="topo-row">
+						<label data-i18n="main.longitude">Longitude:</label>
+						<input type="text" id="ref-lon" placeholder="37.654321" data-i18n-placeholder="main.longitudeExample">
+					</div>
+					<div class="topo-row">
+						<label data-i18n="main.depthMeters">Depth (m):</label>
+						<input type="number" id="ref-depth" placeholder="0.0" data-i18n-placeholder="main.depthExample" step="0.1">
+					</div>
+					<button class="panel-btn panel-btn-apply btn-full" onclick="App.addReferenceBeacon()" data-i18n="main.add">➕ Add</button>
+				</div>
+
+				<div id="ref-state" class="panel-info"></div>
+
+				<div class="btn-row">
+					<button id="ref-btn-toggle" class="panel-btn panel-btn-apply" onclick="App.toggleReferenceMode()" data-i18n="main.activate">▶ Activate</button>
+					<button class="panel-btn panel-btn-topo" onclick="App.openTopoHeadingOnly()" data-i18n="main.setHeading">🧭 Set heading</button>
+					<button class="panel-btn panel-btn-close" onclick="App.toggleReferencePanel()" data-i18n="main.closeIcon">✕ Close</button>
+				</div>
+			</div>
+
+			<!-- Панель калибровки -->
+			<div id="calibration-panel">
+			<h3 style="color:var(--border-accent); text-align:center; margin-bottom:16px;" data-i18n="main.phiTitle">🔧 φ calibration</h3>
+				<div class="topo-row">
+					<label data-i18n="main.angleFrom">Start angle (°):</label>
+					<input type="number" id="cfg-cal-from" value="0" min="0" max="360" step="1">
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.angleTo">End angle (°):</label>
+					<input type="number" id="cfg-cal-to" value="360" min="0" max="360" step="1">
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.angleStep">Step (°):</label>
+					<input type="number" id="cfg-cal-step" value="1" min="0.1" max="10" step="0.1">
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.points">Points:</label>
+					<input type="number" id="cfg-cal-points" value="100" min="10" max="1000" step="10">
+				</div>
+				<div id="cal-status" style="text-align:center; font-size:12px; color:var(--text-secondary); margin:10px 0;" data-i18n="main.collectedInitial">Collected: 0</div>
+				<div class="topo-buttons">
+					<button id="btn-cal-start" class="top-btn btn-get-gnss" onclick="App.startCalibration()" data-i18n="main.start">▶ Start</button>
+					<button id="btn-cal-stop" class="top-btn btn-reset-topo" onclick="App.stopCalibration()" disabled data-i18n="main.stop">⏹ Stop</button>
+					<button class="top-btn btn-cancel-topo" onclick="App.toggleCalibration()" data-i18n="main.closeIcon">✕ Close</button>
+				</div>
+			</div>
+
+			<!-- Панель настройки маяка -->
+			<div id="remote-config-panel">
+				<h3 class="panel-title panel-title-topo" data-i18n="main.remoteTitle">⚙ Beacon settings</h3>
+				<div class="panel-subtitle">
+					<span data-i18n="main.currentAddress">Current address:</span> <span id="remote-current-addr" class="status-accent">--</span>
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.newAddress">New address:</label>
+					<input type="number" id="cfg-remote-addr" value="1" min="1" max="16" step="1">
+				</div>
+				<div class="topo-row">
+					<label data-i18n="main.salinity">Salinity (PSU):</label>
+					<input type="number" id="cfg-remote-salinity" value="0" min="0" max="40" step="0.1">
+				</div>
+				<div id="remote-config-status" style="text-align:center; font-size:12px; color:var(--text-secondary); margin:10px 0; min-height:18px;"></div>
+				<div class="topo-buttons">
+					<button class="btn-apply-topo" onclick="App.sendRemoteConfig()" data-i18n="main.send">📤 Send</button>
+					<button class="btn-cancel-topo" onclick="App.toggleRemoteConfig()" data-i18n="main.closeIcon">✕ Close</button>
+				</div>
+			</div>
+
+			<!-- Панель для разных отчетов -->
+			<div id="analysis-panel">
+				<h3 id="analysis-title" class="panel-title panel-title-export" data-i18n="main.analysisTitle">🔍 Log analysis</h3>
+				<div id="analysis-content" style="font-size:12px; line-height:1.6;"></div>
+
+				<div id="drms-phi-section" class="drms-section">
+					<h4 data-i18n="main.phiKnownTitle">🔧 φ calibration using a known point</h4>
+
+					<div id="drms-phi-beacon-select" style="margin-bottom:8px; display:none;">
+						<label class="drms-info" style="display:block;" data-i18n="main.beacon">Beacon:</label>
+						<select id="drms-phi-beacon" class="panel-select" style="width:100%; margin-top:4px;"></select>
+					</div>
+
+					<div class="drms-info">
+						<span data-i18n="main.centroid">Centroid:</span> <span id="drms-phi-centroid" class="status-accent">—</span>
+					</div>
+
+					<div class="drms-row">
+						<label data-i18n="main.actualLatitude">Actual latitude:</label>
+						<input type="text" id="drms-phi-real-lat" placeholder="55.123456" data-i18n-placeholder="main.latitudeExample">
+					</div>
+					<div class="drms-row">
+						<label data-i18n="main.actualLongitude">Actual longitude:</label>
+						<input type="text" id="drms-phi-real-lon" placeholder="37.654321" data-i18n-placeholder="main.longitudeExample">
+					</div>
+
+					<button id="drms-phi-calc-btn" class="panel-btn panel-btn-apply btn-full" data-i18n="main.calculatePhi">Calculate φ</button>
+
+					<div id="drms-phi-result" class="drms-result">
+						<span data-i18n="main.calculatedPhi">Calculated φ:</span> <span id="drms-phi-value" class="drms-result-value"></span>°
+					</div>
+
+					<button id="drms-phi-apply-btn" class="panel-btn panel-btn-apply btn-full" style="display:none;" data-i18n="main.applyPhi">✓ Apply φ</button>
+				</div>
+
+				<div class="btn-row">
+					<button onclick="App.copyAnalysis()" class="panel-btn panel-btn-start" data-i18n="main.copy">📋 Copy</button>
+					<button id="analysis-download-btn" onclick="App.downloadDRMS()" class="panel-btn panel-btn-export" style="display:none;" data-i18n="main.downloadCSV">💾 Download CSV</button>
+					<button onclick="App.closeAnalysis()" class="panel-btn panel-btn-close" data-i18n="main.closeIcon">✕ Close</button>
+				</div>
+			</div>
+
+			<!-- Панель калибровки таблицы антенны -->
+			<div id="antenna-calibration-panel">
+				<h3 class="panel-title panel-title-warning" data-i18n="main.antennaTable">📡 Antenna calibration (table)</h3>
+
+				<div id="ac-status" class="panel-subtitle" style="font-size:14px; color:var(--text-primary);" data-i18n="main.collectedPointsInitial">Points collected: 0</div>
+				<div id="ac-progress" class="panel-subtitle" data-i18n="main.tableNotBuilt">Table has not been built</div>
+				<div id="ac-centroid" class="panel-subtitle" style="color:var(--border-warning);" data-i18n="main.centroidInsufficient">Centroid: insufficient data</div>
+				<div id="ac-coverage" class="panel-subtitle" data-i18n="main.coverageInitial">Coverage: --</div>
+
+				<div class="topo-row">
+					<label data-i18n="main.sectorStep">Angle step (°):</label>
+					<input type="number" id="ac-angle-step" value="1.0" min="0.5" max="10" step="0.5" class="input-narrow">
+				</div>
+
+				<div class="panel-buttons">
+					<button id="ac-btn-start" class="panel-btn panel-btn-start" onclick="UIAntennaCalibration.startCalibration()" data-i18n="main.start">▶ Start</button>
+					<button id="ac-btn-stop" class="panel-btn panel-btn-danger" onclick="UIAntennaCalibration.stopCalibration()" data-i18n="main.stop">⏹ Stop</button>
+					<button id="ac-btn-build" class="panel-btn panel-btn-warning" onclick="UIAntennaCalibration.buildTable()" data-i18n="main.build">🔨 Build</button>
+					<button id="ac-btn-apply" class="panel-btn panel-btn-apply" onclick="UIAntennaCalibration.applyTable()" data-i18n="main.apply">✓ Apply</button>
+					<button id="ac-btn-download" class="panel-btn panel-btn-start" onclick="UIAntennaCalibration.downloadTable()" data-i18n="main.download">💾 Download</button>
+					<button id="ac-btn-download-full" class="panel-btn panel-btn-topo" onclick="UIAntennaCalibration.downloadFullData()" data-i18n="main.fullReport">📊 Full report</button>
+					<button class="panel-btn panel-btn-close" onclick="UIAntennaCalibration.close()" data-i18n="main.closeIcon">✕ Close</button>
+				</div>
+			</div>
+
+        </div>
+
+        <!-- ===== ПАНЕЛЬ МАЯКОВ ===== -->
+        <div id="beacons-bar" class="empty" data-empty-label="No beacon data" data-i18n-data-empty-label="main.emptyBeacons"></div>
+
+	    <!-- ===== FOOTER ===== -->
+		<footer class="footer">
+			<div class="footer-content">
+				<div class="footer-links">
+					<a href="https://github.com/ucnl/AzimuthWebSuite/" target="_blank" rel="noopener" class="footer-link">⭐ GitHub</a>
+					<a href="docs/guide.html" target="_blank" rel="noopener" class="footer-link" data-i18n="main.suiteDocs">📖 AzimuthWebSuite Docs</a>
+					<a href="https://docs.unavlab.com/navigation_and_tracking_systems_en.html#zima" target="_blank" rel="noopener" class="footer-link" data-i18n="main.zimaDocs">📖 Zima2 Docs</a>
+					<a href="https://github.com/ucnl/AzimuthWebSuite/blob/main/LICENSE" target="_blank" rel="noopener" class="footer-link" data-i18n="main.license">⚖️ GNU GPL v3.0 License</a>
+				</div>
+				<div class="footer-info">
+					<span class="footer-copy">&copy; 2026 <span data-i18n="main.organization">(C) UC&amp;NL</span></span>
+					<span class="footer-desc" data-i18n="main.openSource">Pure Open Source</span>
+                    <a href="CHANGELOG.html"
+					   target="_blank" rel="noopener"
+					   style="font-size:9px; color:inherit; text-decoration:none;"
+					   title="Version history" data-i18n-title="main.changelog">
+					   v<span id="app-version">--</span>
+					</a>
+				</div>
+			</div>
+		</footer>
+	</div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК ===== -->
+    <div id="settings-overlay">
+        <div id="settings-modal">
+            <div id="settings-header">
+                <h3 data-i18n="main.settings">⚙ Settings</h3>
+                <select class="language-selector" data-language-selector data-i18n-aria-label="main.language" data-i18n-title="main.language" aria-label="Language" title="Language"></select>
+                <button onclick="App.closeSettings()" title="Close" data-i18n-title="main.close">✕</button>
+            </div>
+            <div id="settings-body">
+                <!-- Секция: Параметры опроса -->
+                <div class="settings-section">
+                    <h4 data-i18n="main.pollSettings">📡 Interrogation settings</h4>
+                    <div class="settings-row">
+                        <label data-i18n="main.addressMask">Address mask:</label>
+                        <input type="number" id="cfg-mask" value="1" min="0" max="65535" onchange="App.onMaskChanged()">
+                    </div>
+                    <div id="addr-checkboxes"></div>
+                    <div class="settings-row">
+                        <label data-i18n="main.maxRange">Max. range (m):</label>
+                        <input type="number" id="cfg-maxdist" value="1000" min="100" max="5000" step="50">
+                    </div>
+                    <div class="settings-row">
+                        <label data-i18n="main.salinity">Salinity (PSU):</label>
+                        <input type="number" id="cfg-salinity" value="0.0" min="0" max="40" step="0.1">
+                    </div>
+                    <div class="settings-row">
+                        <label data-i18n="main.soundSpeed">Sound speed (m/s):</label>
+                        <input type="number" id="cfg-soundspeed" placeholder="Auto" data-i18n-placeholder="main.auto" min="1300" max="1800" step="0.1">
+                    </div>
+                </div>
+
+				<!-- Секция: скорость порта GNSS -->
+				<div class="settings-section">
+					<h4 data-i18n="main.gnssCompass">📡 GNSS compass</h4>
+					<div class="settings-row">
+						<label data-i18n="main.compassMode">Compass mode:</label>
+						<select id="cfg-compass-mode" class="settings-select">
+							<option value="auto" data-i18n="main.compassAuto">Auto (prefer HDT)</option>
+							<option value="hdt" data-i18n="main.compassHDT">HDT only (True)</option>
+							<option value="magnetic" data-i18n="main.compassMagnetic">Magnetic only</option>
+						</select>
+					</div>
+					<div class="settings-row">
+						<label data-i18n="main.baudRate">Baud rate:</label>
+						<select id="cfg-gnss-baud" class="settings-select">
+							<option value="4800">4800</option>
+							<option value="9600">9600</option>
+							<option value="19200">19200</option>
+							<option value="38400">38400</option>
+							<option value="57600">57600</option>
+							<option value="115200">115200</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Секция: Смещения антенны -->
+				<div class="settings-section">
+					<h4 data-i18n="main.offsets">📏 Antenna offsets</h4>
+					<div class="settings-row">
+						<label data-i18n="main.offsetX">X (m):</label>
+						<input type="number" id="cfg-offsetx" value="0.0" step="0.01">
+					</div>
+					<div class="settings-row">
+						<label data-i18n="main.offsetY">Y (m):</label>
+						<input type="number" id="cfg-offsety" value="0.0" step="0.01">
+					</div>
+					<div class="settings-row">
+						<label data-i18n="main.antennaPhi">Antenna φ (°):</label>
+						<input type="number" id="cfg-phi" value="0.0" min="0" max="360" step="0.1">
+					</div>
+
+					<div class="settings-row">
+						<label data-i18n="main.calibration">Calibration:</label>
+						<div class="settings-btn-row">
+							<button class="panel-btn panel-btn-start" onclick="App.loadCalibrationFile()" data-i18n="main.load">📂 Load</button>
+							<button id="btn-reset-calibration" class="panel-btn panel-btn-danger" onclick="App.resetCalibration()" style="display:none;" data-i18n="main.reset">🗑 Reset</button>
+						</div>
+					</div>
+
+					<div class="settings-row" id="calibration-info" style="display:none;">
+						<label></label>
+						<span id="calibration-status" style="font-size:11px; color:var(--text-secondary);"></span>
+					</div>
+				</div>
+
+				<!-- Секция: Режим антенны -->
+				<div class="settings-section">
+					<h4 data-i18n="main.antennaMode">📍 Antenna mode</h4>
+					<div class="settings-row">
+						<label data-i18n="main.operatingMode">Operating mode:</label>
+						<select id="cfg-antenna-mode" class="settings-select">
+							<option value="geographic" data-i18n="main.geographic">🌍 Geographic</option>
+							<option value="cartesian_fixed" data-i18n="main.cartesian">📐 Cartesian (stationary)</option>
+							<option value="beacon_referenced" data-i18n="main.referenced">⚓ Reference beacons</option>
+						</select>
+					</div>
+					<div class="settings-row">
+						<small style="color: var(--text-secondary);" data-i18n="main.cartesianHint">Cartesian mode: antenna at (0,0,0), beacon coordinates in meters (X→right, Y→forward, Z→depth)</small>
+					</div>
+				</div>
+
+				<!-- Секция: Фильтры DH -->
+				<div class="settings-section">
+					<h4 data-i18n="main.beaconFilter">🎯 Beacon filter (DH)</h4>
+					<div class="settings-row">
+						<label data-i18n="main.maxBeaconSpeed">Max. speed (m/s):</label>
+						<input type="number" id="cfg-max-beacon-speed"
+							   value="2.0" min="0.5" max="5" step="0.1">
+						<span style="font-size:10px; margin-left:8px;" data-i18n="main.beaconSpeedRange">(0.5 - 5 m/s)</span>
+					</div>
+					<div class="settings-row">
+						<small style="color: var(--text-secondary);" data-i18n="main.beaconFilterHint">Beacon points exceeding this speed are discarded</small>
+					</div>
+
+					<h4 style="margin-top:16px;" data-i18n="main.shipFilter">⚓ Vessel filter (DH, reference beacon mode)</h4>
+					<div class="settings-row">
+						<label data-i18n="main.maxShipSpeed">Max. vessel speed (m/s):</label>
+						<input type="number" id="cfg-max-ship-speed"
+							   value="2.0" min="0.5" max="50" step="0.1">
+						<span style="font-size:10px; margin-left:8px;" data-i18n="main.shipSpeedRange">(0.5 - 50 m/s)</span>
+					</div>
+					<div class="settings-row">
+						<small style="color: var(--text-secondary);" data-i18n="main.shipFilterHint">Vessel positions exceeding this speed are discarded (⚓ Reference beacon mode only)</small>
+					</div>
+				</div>
+
+                <!-- Секция: Треки -->
+                <div class="settings-section">
+                    <h4 data-i18n="main.beaconTracks">📐 Beacon tracks</h4>
+                    <div class="settings-row">
+                        <label data-i18n="main.maxPoints">Max. points on screen:</label>
+                        <input type="number" id="cfg-maxpoints" value="1000" min="50" max="50000" step="50">
+                    </div>
+                    <div class="settings-row">
+                        <label data-i18n="main.minDistance">Min. distance (m):</label>
+                        <input type="number" id="cfg-minpointdist" value="0.5" min="0.1" max="50" step="0.1">
+                    </div>
+                </div>
+            </div>
+            <div id="settings-footer">
+                <button class="btn-apply" onclick="App.applySettings()" data-i18n="main.apply">✓ Apply</button>
+                <button class="btn-close-settings" onclick="App.closeSettings()" data-i18n="main.close">Close</button>
+            </div>
+        </div>
+    </div>
+
+	<!-- ===== Стартовый мастер ===== -->
+	<div id="wizard-overlay">
+		<div id="wizard-modal">
+			<h3 id="wizard-title" style="color:var(--border-accent); text-align:center; margin-bottom:16px;" data-i18n="main.wizardTitle">⚙ Setup</h3>
+			<div id="wizard-body" style="margin-bottom:20px;"></div>
+			<div id="wizard-buttons" style="display:flex; gap:8px; justify-content:space-between; align-items:center;"></div>
+		</div>
+	</div>
+
+    <!-- ===== СКРИПТЫ (порядок важен) ===== -->
+	<script src="localization/i18n.js"></script>
+	<script src="localization/languages.js"></script>
+	<script src="log-storage.js"></script>
+	<script src="logger.js"></script>
+	<script src="log-analyzer.js"></script>
+	<script src="geo-utils.js"></script>
+	<script src="color-cache.js"></script>
+	<script src="vincenty.js"></script>
+	<script src="haversine.js"></script>
+	<script src="dh-filter.js"></script>
+	<script src="achod-bearing-filter.js"></script>
+	<script src="median.js"></script>
+	<script src="smoother.js"></script>
+	<script src="dh-filter-xyz.js"></script>
+	<script src="smoother-xyz.js"></script>
+	<script src="calibration.js"></script>
+	<script src="gnss-parser.js"></script>
+	<script src="azm-parser.js"></script>
+	<script src="webview-stub.js"></script>
+	<script src="serial-bridge.js"></script>
+	<script src="antenna-corrector.js"></script>
+	<script src="antenna-table-calibration.js"></script>
+	<script src="sound-speed.js"></script>
+	<script src="azm-manager.js"></script>
+	<script src="utm.js"></script>
+	<script src="tracks.js"></script>
+	<script src="csv.js"></script>
+	<script src="poi-manager.js"></script>
+	<script src="export.js"></script>
+	<script src="modules/ui-themes.js"></script>
+	<script src="modules/ui-settings.js"></script>
+	<script src="modules/ui-ruler.js"></script>
+	<script src="modules/ui-topo.js"></script>
+	<script src="modules/ui-calibration.js"></script>
+	<script src="modules/ui-antenna-calibration.js"></script>
+	<script src="modules/ui-canvas.js"></script>
+	<script src="modules/ui-wizard.js"></script>
+	<script src="app.js"></script>
+
+	<script>
+		if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+		  window.addEventListener('load', () => {
+			navigator.serviceWorker.register('sw.js')
+			  .then((reg) => console.log(I18n.t('main.swRegistered'), reg.scope))
+			  .catch((err) => console.warn(I18n.t('main.swError'), err));
+		  });
+		}
+	</script>
+</body>
+</html>
