@@ -3,6 +3,15 @@
 ---
 # Changelog
 
+## [1.6.2] - 2026-10-15
+### Fixed
+- Added unwrapLongitude and normalizeLongitude functions to geo-utils.js, called in the DRMS report
+
+## [1.6.1] - 2026-10-15
+### Added
+- Added handling of special zones to utm.js
+
+
 ## [1.6.0] - 2026-10-15
 ### Added
 - Multilingual interface: Russian, English, Portuguese (BR). Language selector in the top bar and settings window.
