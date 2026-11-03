@@ -3,6 +3,10 @@
 ---
 # Changelog
 
+## [1.6.3] - 2026-11-03
+### Fixed
+- The beacon settings icon was not displayed when a beacon was connected to the application (handleDINFO in app.js)
+
 ## [1.6.2] - 2026-10-15
 ### Fixed
 - Added unwrapLongitude and normalizeLongitude functions to geo-utils.js, called in the DRMS report
