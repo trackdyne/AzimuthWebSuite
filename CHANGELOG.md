@@ -3,6 +3,10 @@
 ---
 # Changelog
 
+## [1.6.4] - 2026-11-13
+### Fixed
+- Added support for loading and playing log files in the mobile version.
+
 ## [1.6.3] - 2026-11-03
 ### Fixed
 - The beacon settings icon was not displayed when a beacon was connected to the application (handleDINFO in app.js)
