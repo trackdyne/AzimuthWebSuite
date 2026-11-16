@@ -3,6 +3,12 @@
 ---
 # Changelog
 
+
+## [1.6.5] - 2026-11-16
+### Fixed
+- Added support for loading and playing log files in the mobile version.
+- Optimized the layout of buttons on the map panel in the mobile version
+
 ## [1.6.4] - 2026-11-13
 ### Fixed
 - Added the ability to load and play back log files in the mobile version (not through UCNLLauncher).
