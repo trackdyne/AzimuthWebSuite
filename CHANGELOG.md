@@ -5,7 +5,7 @@
 
 ## [1.6.4] - 2026-11-13
 ### Fixed
-- Added support for loading and playing log files in the mobile version.
+- Added the ability to load and play back log files in the mobile version (not through UCNLLauncher).
 
 ## [1.6.3] - 2026-11-03
 ### Fixed

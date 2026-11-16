@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "aws-en-";
-const CACHE = CACHE_PREFIX + "bc0f3240432982f0f26c3516";
+const CACHE = CACHE_PREFIX + "380682fd997b3d32d42385ff";
 
 const ASSETS = [
   "./",
